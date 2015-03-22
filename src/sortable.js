@@ -55,7 +55,7 @@ function Sortable(el, options) {
                     candidate,
                     dist;
                 for (n = 0; n <= childnum; n++) {
-                    candidate = placeholder().css({height: 20, width: 20}).nthChild(container, n);
+                    candidate = placeholder().nthChild(container, n);
                     dist = square_dist(candidate.offset(), pos);
                     if (!best || best.dist > dist) {
                         best = {container: container, n: n, dist: dist};

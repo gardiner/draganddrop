@@ -1,3 +1,7 @@
+ul.normal {
+    width: 500px;
+}
+
 ul.float {
     list-style-position: inside;
     padding: 0;
