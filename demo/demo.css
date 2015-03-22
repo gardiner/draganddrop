@@ -1,3 +1,8 @@
+h3 {
+    margin: 20px 0;
+    clear: both;
+}
+
 ul.normal {
     width: 500px;
 }
@@ -6,6 +11,7 @@ ul.float {
     list-style-position: inside;
     padding: 0;
     margin: 0;
+    overflow: hidden;
 }
 
 ul.float li {
@@ -14,7 +20,6 @@ ul.float li {
 }
 
 ul.inline {
-    clear: both;
     list-style-position: inside;
     padding: 0;
     margin: 0;
@@ -25,7 +30,6 @@ ul.inline li {
     vertical-align: top;
     margin: 10px;
 }
-
 
 li {
     padding: 5px;
