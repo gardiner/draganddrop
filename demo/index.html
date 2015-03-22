@@ -9,7 +9,8 @@
     <script src='../src/sortable.js' type='text/javascript'></script>
     <script type='text/javascript'>
       $(function() {
-        $('ul.sortable').sortable();
+        $('ul.sortable.normal').sortable({autocreate: true});
+        $('ul.sortable:not(.normal)').sortable();
       });
     </script>
     <title>Sortable</title>

@@ -5,7 +5,8 @@
 function Sortable(el, options) {
     var DEFAULTS = {
             container: el.nodeName,
-            nodes: (el.nodeName == 'OL' || el.nodeName == 'UL') ? 'LI' : 'DIV'
+            nodes: (el.nodeName == 'OL' || el.nodeName == 'UL') ? 'LI' : 'DIV',
+            autocreate: false
         },
         $sortable = $(el);
 
@@ -48,22 +49,22 @@ function Sortable(el, options) {
             .not($clone.find(options.container));
 
             $placeholder.hide();
-
             containers.each(function(ix, container) {
                 var childnum = $(container).children().length,
-                    n, 
+                    n,
                     candidate,
                     dist;
+
                 for (n = 0; n <= childnum; n++) {
                     candidate = placeholder().nthChild(container, n);
                     dist = square_dist(candidate.offset(), pos);
+                    candidate.remove();
+
                     if (!best || best.dist > dist) {
                         best = {container: container, n: n, dist: dist};
                     }
-                    candidate.remove();
                 }
             });
-
             $placeholder.show();
 
             return best;
@@ -74,10 +75,21 @@ function Sortable(el, options) {
              * drag start - create clone and placeholder, keep drag start position.
              */
             dragstart: function(evt) {
+                //visual clone to show drag position
                 $clone = $node.clone().addClass('detached').appendTo($node.parent()).offset($node.offset());
+                //placeholder to show insert position
                 $placeholder = placeholder().css({height: $node.outerHeight(), width: $node.outerWidth()}).insertAfter($node);
+                //hide actual node
                 $node.hide();
+                //drag origin
                 dragorigin = $clone.offset();
+
+                if (options.autocreate) {
+                    //add sublists
+                    $sortable.find(options.nodes).filter(function(ix, el) {
+                        return $(el).find(options.container).length == 0;
+                    }).append('<' + options.container + ' class="insert"/>');
+                }
             },
             /**
              * drag - position clone, check for best insert position, move placeholder in dom accordingly.
@@ -96,7 +108,10 @@ function Sortable(el, options) {
                 var pos = abspos(delta),
                     best = insert_point(pos);
 
+                //move actual node
                 $node.nthChild(best.container, best.n).show();
+
+                //cleanup
                 if ($clone) {
                     $clone.remove();
                 }
