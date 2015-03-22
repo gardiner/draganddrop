@@ -140,6 +140,7 @@ $.fn.sortable = function(options) {
 
 function Draggable(el, options) {
     var pos = null,
+        lastpos = null,
         $el = $(el);
 
     function evtpos(evt) {
@@ -154,26 +155,30 @@ function Draggable(el, options) {
     }
 
     function start(evt) {
-        evt.stopPropagation();
-        pos = evtpos(evt);
-        if (options.dragstart) {
-            options.dragstart.call($el, evt);
+        if (evt.type == 'touchstart' || evt.button == 0) {
+            evt.stopPropagation();
+            pos = evtpos(evt);
+            if (options.dragstart) {
+                options.dragstart.call($el, evt);
+            }
+        }
+    }
+
+    function move(evt) {
+        if (pos && options.drag) {
+            evt.stopPropagation();
+            lastpos = relpos(evt);
+            options.drag.call($el, evt, lastpos);
         }
     }
 
     function end(evt) {
-        evt.stopPropagation();
         if (pos && options.dragstop) {
-            options.dragstop.call($el, evt, relpos(evt));
+            evt.stopPropagation();
+            options.dragstop.call($el, evt, lastpos);
         }
         pos = false;
-    }
-
-    function move(evt) {
-        evt.stopPropagation();
-        if (pos && options.drag) {
-            options.drag.call($el, evt, relpos(evt));
-        }
+        lastpos = false;
     }
 
     $el
