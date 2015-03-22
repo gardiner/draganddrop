@@ -1,0 +1,25 @@
+{
+  "name": "sortable",
+  "version": "0.0.0",
+  "authors": [
+    "Ole Trenner <ole@jayotee.de>"
+  ],
+  "description": "Nested sortable.",
+  "keywords": [
+    "jquery",
+    "sortable",
+    "nested"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.3"
+  }
+}

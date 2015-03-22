@@ -1,0 +1,25 @@
+.unselectable {
+    -moz-user-select: -moz-none,
+    -moz-user-select: none,
+    -o-user-select: none,
+    -khtml-user-select: none,
+    -webkit-user-select: none,
+    -ms-user-select: none,
+    user-select: none
+}
+
+.sortable {
+}
+
+.sortable .detached {
+    position: absolute;
+    list-style-type: none;
+    opacity: 0.5;
+}
+
+.sortable .placeholder {
+    box-sizing: border-box;
+    list-style-type: none;
+    background: #eee;
+    border: 2px dotted #52b218;
+}

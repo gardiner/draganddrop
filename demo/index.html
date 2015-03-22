@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+  <head>
+    <meta content='text/html;charset=utf-8' http-equiv='Content-Type'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'>
+    <link href='demo.css' rel='stylesheet' type='text/css'>
+    <link href='../src/sortable.css' rel='stylesheet' type='text/css'>
+    <script src='../bower_components/jquery/dist/jquery.min.js' type='text/javascript'></script>
+    <script src='../src/sortable.js' type='text/javascript'></script>
+    <script type='text/javascript'>
+      $(function() {
+        $('ul.sortable').sortable();
+      });
+    </script>
+    <title>Sortable</title>
+  </head>
+  <body>
+    <ul class="sortable">
+      <li>
+        Item 1
+      </li>
+      <li>
+        Item 2
+      </li>
+      <li>
+        Item 3
+        <ul>
+          <li>Subitem 1</li>
+          <li>Subitem 2</li>
+          <li>Subitem 3</li>
+        </ul>
+      </li>
+      <li>
+        Item 4
+      </li>
+    </ul>
+
+    <ul class="sortable float">
+      <li>
+        Item 1
+      </li>
+      <li>
+        Item 2
+      </li>
+      <li>
+        Item 3
+      </li>
+      <li>
+        Item 4
+      </li>
+    </ul>
+
+    <ul class="sortable inline">
+      <li>
+        Item 1
+      </li>
+      <li>
+        Item 2
+      </li>
+      <li>
+        Item 3
+      </li>
+      <li>
+        Item 4
+      </li>
+    </ul>
+  </body>
+</html>

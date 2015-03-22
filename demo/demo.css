@@ -1,0 +1,28 @@
+ul.float {
+    list-style-position: inside;
+    padding: 0;
+    margin: 0;
+}
+
+ul.float li {
+    float: left;
+    margin: 10px;
+}
+
+ul.inline {
+    clear: both;
+    list-style-position: inside;
+    padding: 0;
+    margin: 0;
+}
+
+ul.inline li {
+    display: inline-block;
+    vertical-align: top;
+    margin: 10px;
+}
+
+
+li {
+    padding: 5px;
+}
