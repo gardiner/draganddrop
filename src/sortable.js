@@ -4,9 +4,21 @@
 
 function Sortable(el, options) {
     var DEFAULTS = {
+            container: el.nodeName,
             nodes: (el.nodeName == 'OL' || el.nodeName == 'UL') ? 'LI' : 'DIV'
-        };
+        },
+        $sortable = $(el);
+
     options = $.extend(DEFAULTS, options);
+
+    function placeholder() {
+        return $('<' + options.nodes + '/>').addClass('placeholder');
+    }
+
+    function square_dist(pos1, pos2) {
+        var dist = Math.pow(pos2.left - pos1.left, 2) + Math.pow(pos2.top - pos1.top, 2);
+        return dist;
+    }
 
     //TODO: check if needed here
     $('html')
@@ -14,7 +26,7 @@ function Sortable(el, options) {
     .attr('unselectable','on')
     .on('selectstart', function() { return false; });
 
-    $(el)
+    $sortable
     .addClass('sortable')
     .find(options.nodes).each(function(ix, node) {
         var $node = $(node),
@@ -22,18 +34,69 @@ function Sortable(el, options) {
             $placeholder,
             dragorigin;
 
+        function abspos(delta) {
+            return {top: dragorigin.top + delta.dy, left: dragorigin.left + delta.dx};
+        }
+
+        function insert_point(pos) {
+            var containers,
+                best;
+
+            containers = $sortable
+            .add($sortable.find(options.container))
+            .not($node.find(options.container))
+            .not($clone.find(options.container));
+
+            $placeholder.hide();
+
+            containers.each(function(ix, container) {
+                var childnum = $(container).children().length,
+                    n, 
+                    candidate,
+                    dist;
+                for (n = 0; n <= childnum; n++) {
+                    candidate = placeholder().css({height: 20, width: 20}).nthChild(container, n);
+                    dist = square_dist(candidate.offset(), pos);
+                    if (!best || best.dist > dist) {
+                        best = {container: container, n: n, dist: dist};
+                    }
+                    candidate.remove();
+                }
+            });
+
+            $placeholder.show();
+
+            return best;
+        }
+
         $node.draggable({
+            /**
+             * drag start - create clone and placeholder, keep drag start position.
+             */
             dragstart: function(evt) {
-                console.log($node.text().trim());
                 $clone = $node.clone().addClass('detached').appendTo($node.parent()).offset($node.offset());
-                $placeholder = $('<' + options.nodes + '/>').addClass('placeholder').css({height: $node.outerHeight(), width: $node.outerWidth()}).insertAfter($node);
+                $placeholder = placeholder().css({height: $node.outerHeight(), width: $node.outerWidth()}).insertAfter($node);
                 $node.hide();
                 dragorigin = $clone.offset();
             },
+            /**
+             * drag - position clone, check for best insert position, move placeholder in dom accordingly.
+             */
             drag: function(evt, delta) {
-                $clone.offset({top: dragorigin.top + delta.dy, left: dragorigin.left + delta.dx});
+                var pos = abspos(delta),
+                    best = insert_point(pos);
+
+                $clone.offset(pos);
+                $placeholder.nthChild(best.container, best.n);
             },
-            dragstop: function(evt) {
+            /**
+             * drag stop - clean up.
+             */
+            dragstop: function(evt, delta) {
+                var pos = abspos(delta),
+                    best = insert_point(pos);
+
+                $node.nthChild(best.container, best.n).show();
                 if ($clone) {
                     $clone.remove();
                 }
@@ -43,7 +106,6 @@ function Sortable(el, options) {
                 dragorigin = null;
                 $clone = null;
                 $placeholder = null;
-                $node.show();
             }
         });
     });
@@ -65,9 +127,20 @@ function Draggable(el, options) {
     var pos = null,
         $el = $(el);
 
+    function evtpos(evt) {
+        evt = window.hasOwnProperty('event') ? window.event : evt;
+        evt = evt.hasOwnProperty('touches') ? evt.touches[0] : evt;
+        return {x: evt.pageX, y: evt.pageY};
+    }
+
+    function relpos(evt) {
+        var p = evtpos(evt);
+        return {dx: p.x - pos.x, dy: p.y - pos.y};
+    }
+
     function start(evt) {
         evt.stopPropagation();
-        pos = $.pos(evt);
+        pos = evtpos(evt);
         if (options.dragstart) {
             options.dragstart.call($el, evt);
         }
@@ -75,17 +148,16 @@ function Draggable(el, options) {
 
     function end(evt) {
         evt.stopPropagation();
-        pos = false;
-        if (options.dragstop) {
-            options.dragstop.call($el, evt);
+        if (pos && options.dragstop) {
+            options.dragstop.call($el, evt, relpos(evt));
         }
+        pos = false;
     }
 
     function move(evt) {
         evt.stopPropagation();
-        var p = $.pos(evt);
         if (pos && options.drag) {
-            options.drag.call($el, evt, {dx: p.x - pos.x, dy: p.y - pos.y});
+            options.drag.call($el, evt, relpos(evt));
         }
     }
 
@@ -107,15 +179,20 @@ $.fn.draggable = function(options) {
 };
 
 /**
- * Event pos helper.
+ * Inserts the current selection as nth child into first element matching selector.
  */
-$.pos = function(evt) {
-    evt = window.hasOwnProperty('event') ? window.event : evt;
-    evt = evt.hasOwnProperty('touches') ? evt.touches[0] : evt;
-    return {x: evt.pageX, y: evt.pageY};
+$.fn.nthChild = function(selector, n) {
+    var $container = $(selector).eq(0),
+        $children = $container.children();
+    if (n == 0) {
+        $container.prepend(this);
+    } else if (n >= $children.length) {
+        $container.append(this);
+    } else {
+        $children.eq(n).before(this);
+    }
+    return this;
 };
-
-
 
 
 }(jQuery));
