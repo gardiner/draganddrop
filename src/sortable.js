@@ -13,6 +13,7 @@ function Sortable(el, options) {
             container_type: container_type,
             nodes: node_type,
             nodes_type: node_type,
+            auto_container_class: 'sortable_container',
             autocreate: false
         };
 
@@ -78,7 +79,8 @@ Sortable.prototype.init_node = function(node) {
         containers = self.$sortable
         .add(self.$sortable.find(self.options.container))
         .not($node.find(self.options.container))
-        .not($clone.find(self.options.container));
+        .not($clone.find(self.options.container))
+        .not(self.find_nodes());
 
         $placeholder.hide();
         containers.each(function(ix, container) {
@@ -120,7 +122,7 @@ Sortable.prototype.init_node = function(node) {
                 //add sublists
                 self.find_nodes().filter(function(ix, el) {
                     return $(el).find(self.options.container).length == 0;
-                }).append('<' + self.options.container_type + ' class="insert"/>');
+                }).append('<' + self.options.container_type + ' class="' + self.options.auto_container_class + '"/>');
             }
         },
 
@@ -168,7 +170,7 @@ Sortable.prototype.destroy_node = function(node) {
 
 Sortable.prototype.find_nodes = function() {
     var self = this;
-    return self.$sortable.find(self.options.nodes);
+    return self.$sortable.find(self.options.nodes).not(self.options.container);
 };
 
 Sortable.prototype.create_placeholder = function() {
