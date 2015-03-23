@@ -4,153 +4,190 @@
 
 function Sortable(el, options) {
     //TODO: drag handle
-    var $sortable = $(el),
+    var self = this,
+        $sortable = $(el),
         container = $sortable[0].nodeName,
-        DEFAULTS = {
+        defaults = {
             container: container,
             nodes: (container == 'OL' || container == 'UL') ? 'LI' : 'DIV',
             autocreate: false
         };
 
-    options = $.extend(DEFAULTS, options);
+    self.$sortable = $sortable;
+    self.options = $.extend({}, defaults, options);
 
-    function placeholder() {
-        return $('<' + options.nodes + '/>').addClass('placeholder');
-    }
+    self.init();
 
-    function square_dist(pos1, pos2) {
-        var dist = Math.pow(pos2.left - pos1.left, 2) + Math.pow(pos2.top - pos1.top, 2);
-        return dist;
-    }
-
-    //TODO: check if needed here
-    $('html')
-    .addClass('unselectable')
-    .attr('unselectable','on')
-    .on('selectstart', function() { return false; });
-
-    $sortable
-    .addClass('sortable')
-    .find(options.nodes).each(function(ix, node) {
-        var $node = $(node),
-            $clone,
-            $placeholder,
-            dragorigin;
-
-        function abspos(delta) {
-            if (!delta) {
-                return;
-            }
-            return {top: dragorigin.top + delta.dy, left: dragorigin.left + delta.dx};
-        }
-
-        function insert_point(pos) {
-            var containers,
-                best;
-
-            if (!pos) {
-                return;
-            }
-
-            containers = $sortable
-            .add($sortable.find(options.container))
-            .not($node.find(options.container))
-            .not($clone.find(options.container));
-
-            $placeholder.hide();
-            containers.each(function(ix, container) {
-                var childnum = $(container).children().length,
-                    n,
-                    candidate,
-                    dist;
-
-                for (n = 0; n <= childnum; n++) {
-                    candidate = placeholder().nthChild(container, n);
-                    dist = square_dist(candidate.offset(), pos);
-                    candidate.remove();
-
-                    if (!best || best.dist > dist) {
-                        best = {container: container, n: n, dist: dist};
-                    }
-                }
-            });
-            $placeholder.show();
-
-            return best;
-        }
-
-        $node.draggable({
-            /**
-             * drag start - create clone and placeholder, keep drag start position.
-             */
-            dragstart: function(evt) {
-                //visual clone to show drag position
-                $clone = $node.clone().addClass('detached').appendTo($node.parent()).offset($node.offset());
-                //placeholder to show insert position
-                $placeholder = placeholder().css({height: $node.outerHeight(), width: $node.outerWidth()}).insertAfter($node);
-                //hide actual node
-                $node.hide();
-                //drag origin
-                dragorigin = $clone.offset();
-
-                if (options.autocreate) {
-                    //add sublists
-                    $sortable.find(options.nodes).filter(function(ix, el) {
-                        return $(el).find(options.container).length == 0;
-                    }).append('<' + options.container + ' class="insert"/>');
-                }
-            },
-            /**
-             * drag - position clone, check for best insert position, move placeholder in dom accordingly.
-             */
-            drag: function(evt, delta) {
-                var pos = abspos(delta),
-                    best = insert_point(pos);
-
-                $clone.offset(pos);
-                $placeholder.nthChild(best.container, best.n);
-            },
-            /**
-             * drag stop - clean up.
-             */
-            dragstop: function(evt, delta) {
-                var pos = abspos(delta),
-                    best = insert_point(pos);
-
-                //move actual node
-                if (best) {
-                    $node.nthChild(best.container, best.n);
-                }
-                $node.show();
-
-                //cleanup
-                if ($clone) {
-                    $clone.remove();
-                }
-                if ($placeholder) {
-                    $placeholder.remove();
-                }
-                dragorigin = null;
-                $clone = null;
-                $placeholder = null;
-            }
-        });
+    self.$sortable.on('destroy.sortable', function() {
+        self.destroy();
     });
 }
 
+Sortable.prototype.init = function() {
+    var self = this;
+
+    $('html').unselectable();
+
+    self.$sortable.addClass('sortable');
+    self.find_nodes().each(function(ix, node) {
+        self.init_node(node);
+    });
+};
+
+Sortable.prototype.destroy = function() {
+    var self = this;
+
+    $('html').unselectable('destroy');
+
+    self.$sortable.removeClass('sortable');
+    self.find_nodes().each(function(ix, node) {
+        self.destroy_node(node);
+    });
+};
+
+Sortable.prototype.init_node = function(node) {
+    var self = this,
+        $node = $(node),
+        $clone,
+        $placeholder,
+        dragorigin;
+
+    function abspos(delta) {
+        if (!delta) {
+            return;
+        }
+
+        return {top: dragorigin.top + delta.dy, left: dragorigin.left + delta.dx};
+    }
+
+    function find_insert_point(pos) {
+        var containers,
+            best;
+
+        if (!pos) {
+            return;
+        }
+
+        containers = self.$sortable
+        .add(self.$sortable.find(self.options.container))
+        .not($node.find(self.options.container))
+        .not($clone.find(self.options.container));
+
+        $placeholder.hide();
+        containers.each(function(ix, container) {
+            var childnum = $(container).children().length,
+                n,
+                candidate,
+                dist;
+
+            for (n = 0; n <= childnum; n++) {
+                candidate = self.create_placeholder().nthChild(container, n);
+                dist = self.square_dist(candidate.offset(), pos);
+                candidate.remove();
+
+                if (!best || best.dist > dist) {
+                    best = {container: container, n: n, dist: dist};
+                }
+            }
+        });
+        $placeholder.show();
+
+        return best;
+    }
+
+    $node.draggable({
+        /**
+         * drag start - create clone and placeholder, keep drag start position.
+         */
+        dragstart: function(evt) {
+            //visual clone to show drag position
+            $clone = $node.clone().addClass('detached').appendTo($node.parent()).offset($node.offset());
+            //placeholder to show insert position
+            $placeholder = self.create_placeholder().css({height: $node.outerHeight(), width: $node.outerWidth()}).insertAfter($node);
+            //hide actual node
+            $node.hide();
+            //drag origin
+            dragorigin = $clone.offset();
+
+            if (self.options.autocreate) {
+                //add sublists
+                self.find_nodes().filter(function(ix, el) {
+                    return $(el).find(self.options.container).length == 0;
+                }).append('<' + self.options.container + ' class="insert"/>');
+            }
+        },
+
+        /**
+         * drag - position clone, check for best insert position, move placeholder in dom accordingly.
+         */
+        drag: function(evt, delta) {
+            var pos = abspos(delta),
+                best = find_insert_point(pos);
+
+            $clone.offset(pos);
+            $placeholder.nthChild(best.container, best.n);
+        },
+
+        /**
+         * drag stop - clean up.
+         */
+        dragstop: function(evt, delta) {
+            var pos = abspos(delta),
+                best = find_insert_point(pos);
+
+            //move actual node
+            if (best) {
+                $node.nthChild(best.container, best.n);
+            }
+            $node.show();
+
+            //cleanup
+            if ($clone) {
+                $clone.remove();
+            }
+            if ($placeholder) {
+                $placeholder.remove();
+            }
+            dragorigin = null;
+            $clone = null;
+            $placeholder = null;
+        }
+    });
+};
+
+Sortable.prototype.destroy_node = function(node) {
+    $(node).draggable('destroy');
+};
+
+Sortable.prototype.find_nodes = function() {
+    var self = this;
+    return self.$sortable.find(self.options.nodes);
+};
+
+Sortable.prototype.create_placeholder = function() {
+    var self = this;
+    return $('<' + self.options.nodes + '/>').addClass('placeholder');
+};
+
+Sortable.prototype.square_dist = function(pos1, pos2) {
+    return Math.pow(pos2.left - pos1.left, 2) + Math.pow(pos2.top - pos1.top, 2);
+};
+
+
 /**
- * Sortable plugin.
+ * Sortable plugin registration.
  */
 $.fn.sortable = function(options) {
-    //TODO: specific commands?
-    var self = this.not(function() {
-        return $(this).is('.sortable') || $(this).closest('.sortable').length;
-    });
+    var filtered = this.not(function() {
+            return $(this).is('.sortable') || $(this).closest('.sortable').length;
+        });
 
-    if (self.length && options && options.group) {
-        new Sortable(self, options);
+    if (typeof options === 'string') {
+        this.trigger(options + '.sortable');
+    } else if (filtered.length && options && options.group) {
+        new Sortable(filtered, options);
     } else {
-        self.each(function(ix, el) {
+        filtered.each(function(ix, el) {
             new Sortable(el, options);
         });
     }
@@ -158,10 +195,11 @@ $.fn.sortable = function(options) {
 };
 
 
+
 function Draggable(el, options) {
-    var pos = null,
-        lastpos = null,
-        $el = $(el);
+    var $draggable = $(el),
+        pos = null,
+        lastpos = null;
 
     function evtpos(evt) {
         evt = window.hasOwnProperty('event') ? window.event : evt;
@@ -179,8 +217,13 @@ function Draggable(el, options) {
             evt.stopPropagation();
             pos = evtpos(evt);
             if (options.dragstart) {
-                options.dragstart.call($el, evt);
+                options.dragstart.call($draggable, evt);
             }
+
+            //late binding of event listeners
+            $(document)
+            .on('touchend.draggable mouseup.draggable click.draggable', end)
+            .on('touchmove.draggable mousemove.draggable', move);
         }
     }
 
@@ -188,35 +231,47 @@ function Draggable(el, options) {
         if (pos && options.drag) {
             evt.stopPropagation();
             lastpos = relpos(evt);
-            options.drag.call($el, evt, lastpos);
+            options.drag.call($draggable, evt, lastpos);
         }
     }
 
     function end(evt) {
         if (pos && options.dragstop) {
             evt.stopPropagation();
-            options.dragstop.call($el, evt, lastpos);
+            options.dragstop.call($draggable, evt, lastpos);
         }
         pos = false;
         lastpos = false;
+
+        //unbinding of event listeners
+        $(document)
+        .off('.draggable');
     }
 
-    $el
+    $draggable
     .addClass('draggable')
-    .on('touchstart mousedown', start)
+    .on('touchstart.draggable mousedown.draggable', start);
 
-    $(document)
-    .on('touchend mouseup click', end)
-    .on('touchmove mousemove', move);
+    $draggable.on('destroy.draggable', function() {
+        $draggable
+        .removeClass('draggable')
+        .off('.draggable');
+    });
 }
 
+
 /**
- * Draggable plugin.
+ * Draggable plugin registration.
  */
 $.fn.draggable = function(options) {
-    return this.each(function(ix, el) {
-        new Draggable(el, options);
-    });
+    if (typeof options === 'string') {
+        this.trigger(options + '.draggable');
+    } else {
+        this.not('.draggable').each(function(ix, el) {
+            new Draggable(el, options);
+        });
+    }
+    return this;
 };
 
 /**
@@ -233,6 +288,27 @@ $.fn.nthChild = function(selector, n) {
         $children.eq(n).before(this);
     }
     return this;
+};
+
+/**
+ * Disables mouse selection.
+ */
+$.fn.unselectable = function(command) {
+    function disable() {
+        return false;
+    }
+
+    if (command == 'destroy') {
+        return this
+        .removeClass('unselectable')
+        .removeAttr('unselectable')
+        .off('selectstart.unselectable');
+    } else {
+        return this
+        .addClass('unselectable')
+        .attr('unselectable','on')
+        .on('selectstart.unselectable', disable);
+    }
 };
 
 

@@ -12,11 +12,15 @@
         $('ul.grouped').sortable({group: true}); //grouped lists only
         $('ul.normal').sortable({autocreate: true}); //normal lists
         $('ul').sortable(); //remaining lists
+        $('.off').on('click', function() {
+          $('ul.sortable').sortable('destroy');
+        });
       });
     </script>
     <title>Sortable</title>
   </head>
   <body>
+    <button class="off">All off</button>
     <h3>Normal List</h3>
     <ul class="normal">
       <li>
