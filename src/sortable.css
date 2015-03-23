@@ -8,6 +8,10 @@
     user-select: none
 }
 
+.draggable {
+    cursor: pointer;
+}
+
 .sortable {
 }
 

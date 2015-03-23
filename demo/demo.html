@@ -9,15 +9,16 @@
     <script src='../src/sortable.js' type='text/javascript'></script>
     <script type='text/javascript'>
       $(function() {
-        $('ul.sortable.normal').sortable({autocreate: true});
-        $('ul.sortable:not(.normal)').sortable();
+        $('ul.grouped').sortable({group: true}); //grouped lists only
+        $('ul.normal').sortable({autocreate: true}); //normal lists
+        $('ul').sortable(); //remaining lists
       });
     </script>
     <title>Sortable</title>
   </head>
   <body>
     <h3>Normal List</h3>
-    <ul class="sortable normal">
+    <ul class="normal">
       <li>
         Item 1
       </li>
@@ -46,7 +47,7 @@
     </ul>
 
     <h3>Floating LI elements</h3>
-    <ul class="sortable float">
+    <ul class="float">
       <li>
         Item 1
       </li>
@@ -62,7 +63,7 @@
     </ul>
 
     <h3>Inline-block LI elements</h3>
-    <ul class="sortable inline">
+    <ul class="inline">
       <li>
         Item 1
       </li>
@@ -74,6 +75,30 @@
       </li>
       <li>
         Item 4
+      </li>
+    </ul>
+
+    <h3>Grouped Lists</h3>
+    <ul class="normal grouped">
+      <li>
+        Item 1
+      </li>
+      <li>
+        Item 2
+      </li>
+      <li>
+        Item 3
+      </li>
+    </ul>
+    <ul class="normal grouped">
+      <li>
+        Item 1
+      </li>
+      <li>
+        Item 2
+      </li>
+      <li>
+        Item 3
       </li>
     </ul>
   </body>

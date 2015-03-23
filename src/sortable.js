@@ -3,12 +3,14 @@
 
 
 function Sortable(el, options) {
-    var DEFAULTS = {
-            container: el.nodeName,
-            nodes: (el.nodeName == 'OL' || el.nodeName == 'UL') ? 'LI' : 'DIV',
+    //TODO: drag handle
+    var $sortable = $(el),
+        container = $sortable[0].nodeName,
+        DEFAULTS = {
+            container: container,
+            nodes: (container == 'OL' || container == 'UL') ? 'LI' : 'DIV',
             autocreate: false
-        },
-        $sortable = $(el);
+        };
 
     options = $.extend(DEFAULTS, options);
 
@@ -36,12 +38,19 @@ function Sortable(el, options) {
             dragorigin;
 
         function abspos(delta) {
+            if (!delta) {
+                return;
+            }
             return {top: dragorigin.top + delta.dy, left: dragorigin.left + delta.dx};
         }
 
         function insert_point(pos) {
             var containers,
                 best;
+
+            if (!pos) {
+                return;
+            }
 
             containers = $sortable
             .add($sortable.find(options.container))
@@ -109,7 +118,10 @@ function Sortable(el, options) {
                     best = insert_point(pos);
 
                 //move actual node
-                $node.nthChild(best.container, best.n).show();
+                if (best) {
+                    $node.nthChild(best.container, best.n);
+                }
+                $node.show();
 
                 //cleanup
                 if ($clone) {
@@ -131,10 +143,18 @@ function Sortable(el, options) {
  */
 $.fn.sortable = function(options) {
     //TODO: specific commands?
-    //TODO: check if already applied?
-    return this.each(function(ix, el) {
-        new Sortable(el, options);
+    var self = this.not(function() {
+        return $(this).is('.sortable') || $(this).closest('.sortable').length;
     });
+
+    if (self.length && options && options.group) {
+        new Sortable(self, options);
+    } else {
+        self.each(function(ix, el) {
+            new Sortable(el, options);
+        });
+    }
+    return this;
 };
 
 
@@ -182,10 +202,11 @@ function Draggable(el, options) {
     }
 
     $el
+    .addClass('draggable')
     .on('touchstart mousedown', start)
 
     $(document)
-    .on('touchend mouseup', end)
+    .on('touchend mouseup click', end)
     .on('touchmove mousemove', move);
 }
 
