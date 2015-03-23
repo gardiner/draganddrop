@@ -12,8 +12,10 @@
         $('ul.grouped').sortable({group: true}); //grouped lists only
         $('ul.normal').sortable({autocreate: true}); //normal lists
         $('ul').sortable(); //remaining lists
+        $('.list').sortable({container: '.list'}); //div list
+
         $('.off').on('click', function() {
-          $('ul.sortable').sortable('destroy');
+          $('.sortable').sortable('destroy');
         });
       });
     </script>
@@ -28,9 +30,6 @@
       </li>
       <li>
         Item 2
-      </li>
-      <li>
-        Item 3
         <ul>
           <li>Subitem 1</li>
           <li>
@@ -39,11 +38,10 @@
               <li>Sub-Subitem 1</li>
             </ul>
           </li>
-          <li>Subitem 3</li>
         </ul>
       </li>
       <li>
-        Item 4
+        Item 3
         <ul>
           <li>Subitem 1</li>
         </ul>
@@ -90,9 +88,6 @@
       <li>
         Item 2
       </li>
-      <li>
-        Item 3
-      </li>
     </ul>
     <ul class="normal grouped">
       <li>
@@ -101,9 +96,17 @@
       <li>
         Item 2
       </li>
-      <li>
-        Item 3
-      </li>
     </ul>
+    <h3>List of DIVs</h3>
+    <div class="list">
+      <div>Child 1</div>
+      <div>Child 2</div>
+      <div>
+        Child 3
+        <div class="list">
+          <div>Subchild</div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

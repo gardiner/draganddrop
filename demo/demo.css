@@ -1,5 +1,5 @@
 h3 {
-    margin: 20px 0;
+    margin: 10px 0;
     clear: both;
 }
 
@@ -33,4 +33,9 @@ ul.inline li {
 
 li {
     padding: 5px;
+}
+
+div {
+    margin: 2px;
+    padding: 2px;
 }

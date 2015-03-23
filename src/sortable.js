@@ -6,10 +6,13 @@ function Sortable(el, options) {
     //TODO: drag handle
     var self = this,
         $sortable = $(el),
-        container = $sortable[0].nodeName,
+        container_type = $sortable[0].nodeName,
+        node_type = (container_type == 'OL' || container_type == 'UL') ? 'LI' : 'DIV',
         defaults = {
-            container: container,
-            nodes: (container == 'OL' || container == 'UL') ? 'LI' : 'DIV',
+            container: container_type,
+            container_type: container_type,
+            nodes: node_type,
+            nodes_type: node_type,
             autocreate: false
         };
 
@@ -17,10 +20,6 @@ function Sortable(el, options) {
     self.options = $.extend({}, defaults, options);
 
     self.init();
-
-    self.$sortable.on('destroy.sortable', function() {
-        self.destroy();
-    });
 }
 
 Sortable.prototype.init = function() {
@@ -28,7 +27,12 @@ Sortable.prototype.init = function() {
 
     $('html').unselectable();
 
-    self.$sortable.addClass('sortable');
+    self.$sortable
+    .addClass('sortable')
+    .on('destroy.sortable', function() {
+        self.destroy();
+    });
+
     self.find_nodes().each(function(ix, node) {
         self.init_node(node);
     });
@@ -39,7 +43,10 @@ Sortable.prototype.destroy = function() {
 
     $('html').unselectable('destroy');
 
-    self.$sortable.removeClass('sortable');
+    self.$sortable
+    .removeClass('sortable')
+    .off('.sortable');
+
     self.find_nodes().each(function(ix, node) {
         self.destroy_node(node);
     });
@@ -113,7 +120,7 @@ Sortable.prototype.init_node = function(node) {
                 //add sublists
                 self.find_nodes().filter(function(ix, el) {
                     return $(el).find(self.options.container).length == 0;
-                }).append('<' + self.options.container + ' class="insert"/>');
+                }).append('<' + self.options.container_type + ' class="insert"/>');
             }
         },
 
@@ -166,7 +173,7 @@ Sortable.prototype.find_nodes = function() {
 
 Sortable.prototype.create_placeholder = function() {
     var self = this;
-    return $('<' + self.options.nodes + '/>').addClass('placeholder');
+    return $('<' + self.options.nodes_type + '/>').addClass('placeholder');
 };
 
 Sortable.prototype.square_dist = function(pos1, pos2) {
