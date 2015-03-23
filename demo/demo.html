@@ -17,6 +17,8 @@
         $('.off').on('click', function() {
           $('.sortable').sortable('destroy');
         });
+
+        console.log(JSON.stringify($('ul.normal:not(.grouped)').sortable('serialize')));
       });
     </script>
     <title>Sortable</title>
@@ -25,25 +27,20 @@
     <button class="off">All off</button>
     <h3>Normal List</h3>
     <ul class="normal">
-      <li>
-        Item 1
-      </li>
-      <li>
-        Item 2
+      <li id="e1">Item 1</li>
+      <li id="e2">Item 2
         <ul>
-          <li>Subitem 1</li>
-          <li>
-            Subitem 2
+          <li id="e2.1">Subitem 1</li>
+          <li id="e2.2">Subitem 2
             <ul>
-              <li>Sub-Subitem 1</li>
+              <li id="e2.2.1">Sub-Subitem 1</li>
             </ul>
           </li>
         </ul>
       </li>
-      <li>
-        Item 3
+      <li id="e3">Item 3
         <ul>
-          <li>Subitem 1</li>
+          <li id="e3.1">Subitem 1</li>
         </ul>
       </li>
     </ul>

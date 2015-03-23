@@ -17,11 +17,20 @@ function Sortable(el, options) {
             autocreate: false
         };
 
-    self.$sortable = $sortable;
+    self.$sortable = $sortable.data('sortable', self);
     self.options = $.extend({}, defaults, options);
 
     self.init();
 }
+
+Sortable.prototype.invoke = function(command) {
+    var self = this;
+    if (command === 'destroy') {
+        return self.destroy();
+    } else if (command === 'serialize') {
+        return self.serialize(self.$sortable);
+    }
+};
 
 Sortable.prototype.init = function() {
     var self = this;
@@ -168,6 +177,18 @@ Sortable.prototype.destroy_node = function(node) {
     $(node).draggable('destroy');
 };
 
+Sortable.prototype.serialize = function(container) {
+    var self = this;
+    return container.children(self.options.nodes).not(self.options.container).map(function(ix, el) {
+        var $el = $(el),
+            node = {id: $el.attr('id')};
+        if ($el.children(self.options.container).length) {
+            node.children = self.serialize($el.children(self.options.container));
+        }
+        return node;
+    }).get();
+};
+
 Sortable.prototype.find_nodes = function() {
     var self = this;
     return self.$sortable.find(self.options.nodes).not(self.options.container);
@@ -191,9 +212,11 @@ $.fn.sortable = function(options) {
             return $(this).is('.sortable') || $(this).closest('.sortable').length;
         });
 
-    if (typeof options === 'string') {
-        this.trigger(options + '.sortable');
-    } else if (filtered.length && options && options.group) {
+    if (this.data('sortable') && typeof options === 'string') {
+        return this.data('sortable').invoke(options);
+    }
+
+    if (filtered.length && options && options.group) {
         new Sortable(filtered, options);
     } else {
         filtered.each(function(ix, el) {
@@ -273,8 +296,8 @@ function Draggable(el, options) {
  * Draggable plugin registration.
  */
 $.fn.draggable = function(options) {
-    if (typeof options === 'string') {
-        this.trigger(options + '.draggable');
+    if (options === 'destroy') {
+        this.trigger('destroy.draggable');
     } else {
         this.not('.draggable').each(function(ix, el) {
             new Draggable(el, options);
