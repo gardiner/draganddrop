@@ -9,12 +9,15 @@ function Sortable(el, options) {
         container_type = $sortable[0].nodeName,
         node_type = (container_type == 'OL' || container_type == 'UL') ? 'LI' : 'DIV',
         defaults = {
+            //options
             container: container_type,
             container_type: container_type,
             nodes: node_type,
             nodes_type: node_type,
             auto_container_class: 'sortable_container',
-            autocreate: false
+            autocreate: false,
+            //callbacks
+            update: null
         };
 
     self.$sortable = $sortable.data('sortable', self);
@@ -169,6 +172,11 @@ Sortable.prototype.init_node = function(node) {
             dragorigin = null;
             $clone = null;
             $placeholder = null;
+
+            //call callback only if some node has been dragged. order can be identical, though.
+            if (best && self.options.update) {
+                self.options.update.call(self.$sortable, evt, self);
+            }
         }
     });
 };
@@ -181,8 +189,10 @@ Sortable.prototype.serialize = function(container) {
     var self = this;
     return container.children(self.options.nodes).not(self.options.container).map(function(ix, el) {
         var $el = $(el),
-            node = {id: $el.attr('id')};
-        if ($el.children(self.options.container).length) {
+            text = $el.clone().children().remove().end().text().trim(), //text only without children
+            id = $el.attr('id'),
+            node = {id: id || text};
+        if ($el.find(self.options.nodes).length) {
             node.children = self.serialize($el.children(self.options.container));
         }
         return node;

@@ -9,16 +9,28 @@
     <script src='../src/sortable.js' type='text/javascript'></script>
     <script type='text/javascript'>
       $(function() {
-        $('ul.grouped').sortable({group: true}); //grouped lists only
-        $('ul.normal').sortable({autocreate: true}); //normal lists
-        $('ul').sortable(); //remaining lists
-        $('.list').sortable({container: '.list'}); //div list
+        //grouped lists
+        $('ul.grouped').sortable({
+          group: true
+        });
+
+        //normal list
+        $('ul.normal').sortable({
+          autocreate: true,
+          update: function(evt) {
+            console.log(JSON.stringify($(this).sortable('serialize')));
+          }
+        });
+
+        //remaining lists
+        $('ul.float, ul.inline').sortable();
+
+        //div list
+        $('.list').sortable({container: '.list'});
 
         $('.off').on('click', function() {
           $('.sortable').sortable('destroy');
         });
-
-        console.log(JSON.stringify($('ul.normal:not(.grouped)').sortable('serialize')));
       });
     </script>
     <title>Sortable</title>
@@ -27,20 +39,20 @@
     <button class="off">All off</button>
     <h3>Normal List</h3>
     <ul class="normal">
-      <li id="e1">Item 1</li>
-      <li id="e2">Item 2
+      <li>Item 1</li>
+      <li>Item 2
         <ul>
-          <li id="e2.1">Subitem 1</li>
-          <li id="e2.2">Subitem 2
+          <li>Item 2.1</li>
+          <li>Item 2.2
             <ul>
-              <li id="e2.2.1">Sub-Subitem 1</li>
+              <li>Item 2.2.1</li>
             </ul>
           </li>
         </ul>
       </li>
-      <li id="e3">Item 3
+      <li>Item 3
         <ul>
-          <li id="e3.1">Subitem 1</li>
+          <li>Item 3.1</li>
         </ul>
       </li>
     </ul>
@@ -78,7 +90,7 @@
     </ul>
 
     <h3>Grouped Lists</h3>
-    <ul class="normal grouped">
+    <ul class="grouped">
       <li>
         Item 1
       </li>
@@ -86,7 +98,7 @@
         Item 2
       </li>
     </ul>
-    <ul class="normal grouped">
+    <ul class="grouped">
       <li>
         Item 1
       </li>
