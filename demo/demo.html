@@ -23,7 +23,11 @@
         });
 
         //remaining lists
-        $('ul.float, ul.inline').sortable();
+        $('ul.float, ul.inline').sortable({
+          update: function(evt) {
+            console.log(JSON.stringify($(this).sortable('serialize')));
+          }
+        });
 
         //div list
         $('.list').sortable({container: '.list'});

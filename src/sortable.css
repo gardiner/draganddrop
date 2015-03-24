@@ -8,7 +8,7 @@
     user-select: none
 }
 
-.draggable {
+.dragaware {
     cursor: pointer;
 }
 

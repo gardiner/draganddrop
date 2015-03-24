@@ -116,7 +116,7 @@ Sortable.prototype.init_node = function(node) {
         return best;
     }
 
-    $node.draggable({
+    $node.dragaware({
         /**
          * drag start - create clone and placeholder, keep drag start position.
          */
@@ -182,7 +182,7 @@ Sortable.prototype.init_node = function(node) {
 };
 
 Sortable.prototype.destroy_node = function(node) {
-    $(node).draggable('destroy');
+    $(node).dragaware('destroy');
 };
 
 Sortable.prototype.serialize = function(container) {
@@ -238,8 +238,8 @@ $.fn.sortable = function(options) {
 
 
 
-function Draggable(el, options) {
-    var $draggable = $(el),
+function Dragaware(el, options) {
+    var $dragaware = $(el),
         pos = null,
         lastpos = null;
 
@@ -259,13 +259,13 @@ function Draggable(el, options) {
             evt.stopPropagation();
             pos = evtpos(evt);
             if (options.dragstart) {
-                options.dragstart.call($draggable, evt);
+                options.dragstart.call($dragaware, evt);
             }
 
             //late binding of event listeners
             $(document)
-            .on('touchend.draggable mouseup.draggable click.draggable', end)
-            .on('touchmove.draggable mousemove.draggable', move);
+            .on('touchend.dragaware mouseup.dragaware click.dragaware', end)
+            .on('touchmove.dragaware mousemove.dragaware', move);
         }
     }
 
@@ -273,48 +273,49 @@ function Draggable(el, options) {
         if (pos && options.drag) {
             evt.stopPropagation();
             lastpos = relpos(evt);
-            options.drag.call($draggable, evt, lastpos);
+            options.drag.call($dragaware, evt, lastpos);
         }
     }
 
     function end(evt) {
         if (pos && options.dragstop) {
             evt.stopPropagation();
-            options.dragstop.call($draggable, evt, lastpos);
+            options.dragstop.call($dragaware, evt, lastpos);
         }
         pos = false;
         lastpos = false;
 
         //unbinding of event listeners
         $(document)
-        .off('.draggable');
+        .off('.dragaware');
     }
 
-    $draggable
-    .addClass('draggable')
-    .on('touchstart.draggable mousedown.draggable', start);
+    $dragaware
+    .addClass('dragaware')
+    .on('touchstart.dragaware mousedown.dragaware', start);
 
-    $draggable.on('destroy.draggable', function() {
-        $draggable
-        .removeClass('draggable')
-        .off('.draggable');
+    $dragaware.on('destroy.dragaware', function() {
+        $dragaware
+        .removeClass('dragaware')
+        .off('.dragaware');
     });
 }
 
 
 /**
- * Draggable plugin registration.
+ * Dragaware plugin registration.
  */
-$.fn.draggable = function(options) {
+$.fn.dragaware = function(options) {
     if (options === 'destroy') {
-        this.trigger('destroy.draggable');
+        this.trigger('destroy.dragaware');
     } else {
-        this.not('.draggable').each(function(ix, el) {
-            new Draggable(el, options);
+        this.not('.dragaware').each(function(ix, el) {
+            new Dragaware(el, options);
         });
     }
     return this;
 };
+
 
 /**
  * Inserts the current selection as nth child into first element matching selector.
@@ -331,6 +332,7 @@ $.fn.nthChild = function(selector, n) {
     }
     return this;
 };
+
 
 /**
  * Disables mouse selection.
