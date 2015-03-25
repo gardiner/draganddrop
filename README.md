@@ -92,6 +92,7 @@ Options and callbacks:
 * ```container``` (string) - selector for container elements
 * ```nodes``` (string) - selector for node elements
 * ```autocreate``` (boolean) - automatically create nested containers within nodes
+* ```group``` (boolean) - if true, all elements in the jQuery object are grouped (items can dragged between them)
 * ```update``` (function) - callback after sorting. Arguments: event, Sortable instance. This: sortable element.
 
 Commands:

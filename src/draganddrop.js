@@ -16,6 +16,7 @@ function Sortable(el, options) {
             nodes_type: node_type,
             auto_container_class: 'sortable_container',
             autocreate: false,
+            group: false,
             //callbacks
             update: null
         };
