@@ -1,12 +1,13 @@
 {
-  "name": "sortable",
+  "name": "draganddrop",
   "version": "0.0.2pre",
   "authors": [
     "Ole Trenner <ole@jayotee.de>"
   ],
-  "description": "Nested sortable.",
+  "description": "Drag and Drop: Dragaware, Draggable, Nested Sortable.",
   "keywords": [
     "jquery",
+    "draggable",
     "sortable",
     "nested"
   ],
