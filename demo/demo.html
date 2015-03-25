@@ -33,19 +33,32 @@
         $('.list').sortable({container: '.list'});
 
         //draggable
-        $('.drag').draggable({revert: false, placeholder: true});
+        $('.drag').draggable();
+        $('.dragdrop').draggable({
+          revert: true,
+          placeholder: true,
+          droptarget: '.drop',
+          drop: function(evt, droptarget) {
+            $(this).appendTo(droptarget).draggable('destroy');
+          }
+        });
 
+        //off switch
         $('.off').on('click', function() {
           $('.sortable').each(function() { $(this).sortable('destroy'); });
           $('.draggable').each(function() { $(this).draggable('destroy'); });
         });
       });
     </script>
-    <title>Sortable</title>
+    <title>Drag and Drop Demo</title>
   </head>
   <body>
-    <button class="off">All off</button>
+    <h2>Drag and Drop Demo</h2>
+
+    <h3>Draggables</h3>
     <button class="drag">Drag me</button>
+    <button class="dragdrop">Drag and Drop me</button>
+    <div class="drop"><p>Drop here</p></div>
 
     <h3>Normal List</h3>
     <ul class="normal">
@@ -128,5 +141,9 @@
         </div>
       </div>
     </div>
+
+    <h3>Off Switch</h3>
+    <button class="off">All off</button>
+
   </body>
 </html>

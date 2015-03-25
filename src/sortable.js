@@ -211,8 +211,10 @@ function Draggable(el, options) {
             //options
             revert: false,
             placeholder: false,
+            droptarget: false,
             //callbacks
-            update: null
+            update: null,
+            drop: null
         };
 
     self.$draggable = $(el).data('draggable', self);
@@ -233,6 +235,21 @@ Draggable.prototype.init = function() {
         self.destroy();
     });
 
+    function check_droptarget(pos) {
+        var $over;
+
+        $('.hovering').removeClass('hovering');
+
+        $clone.hide();
+        $over = $(document.elementFromPoint(pos.x, pos.y)).closest(self.options.droptarget);
+        $clone.show();
+
+        if ($over.length) {
+            $over.addClass('hovering');
+            return $over;
+        }
+    }
+
     self.$draggable.dragaware({
         /**
          * drag start - create clone and placeholder, keep drag start position.
@@ -244,7 +261,7 @@ Draggable.prototype.init = function() {
 
             if (self.options.revert) {
                 $clone = self.create_clone('draggable_clone');
-                self.$draggable.hide();
+                self.$draggable.invisible();
             } else {
                 $clone = self.$draggable;
             }
@@ -255,21 +272,24 @@ Draggable.prototype.init = function() {
         /**
          * drag - reposition clone.
          */
-        drag: function(evt, delta) {
+        drag: function(evt, delta, pos) {
+            var $droptarget = check_droptarget(pos);
             $clone.offset(position.absolutize(delta));
         },
 
         /**
          * drag stop - clean up.
          */
-        dragstop: function(evt, delta) {
-            if (self.options.revert) {
-                $clone.remove();
-                self.$draggable.show();
-            }
+        dragstop: function(evt, delta, pos) {
+            var $droptarget = check_droptarget(pos);
 
             if (self.options.placeholder) {
                 $placeholder.remove();
+            }
+
+            if (self.options.revert) {
+                $clone.remove();
+                self.$draggable.visible();
             }
 
             $clone = null;
@@ -277,6 +297,13 @@ Draggable.prototype.init = function() {
 
             if (self.options.update) {
                 self.options.update.call(self.$draggable, evt, self);
+            }
+
+            if ($droptarget) {
+                if (self.options.drop) {
+                    self.options.drop.call(self.$draggable, evt, $droptarget[0]);
+                }
+                $droptarget.removeClass('hovering');
             }
         }
     });
@@ -338,14 +365,14 @@ function Dragaware(el, options) {
         if (pos && options.drag) {
             evt.stopPropagation();
             lastpos = relpos(evt);
-            options.drag.call($dragaware, evt, lastpos);
+            options.drag.call($dragaware, evt, lastpos, evtpos(evt));
         }
     }
 
     function end(evt) {
         if (pos && options.dragstop) {
             evt.stopPropagation();
-            options.dragstop.call($dragaware, evt, lastpos);
+            options.dragstop.call($dragaware, evt, lastpos, evtpos(evt));
         }
         pos = false;
         lastpos = false;
@@ -474,6 +501,16 @@ $.fn.unselectable = function(command) {
         .attr('unselectable','on')
         .on('selectstart.unselectable', disable);
     }
+};
+
+
+$.fn.invisible = function() {
+    return this.css({visibility: 'hidden'});
+};
+
+
+$.fn.visible = function() {
+    return this.css({visibility: 'visible'});
 };
 
 
