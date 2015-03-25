@@ -70,15 +70,7 @@ Sortable.prototype.init_node = function(node) {
         $node = $(node),
         $clone,
         $placeholder,
-        dragorigin;
-
-    function abspos(delta) {
-        if (!delta) {
-            return;
-        }
-
-        return {top: dragorigin.top + delta.dy, left: dragorigin.left + delta.dx};
-    }
+        position;
 
     function find_insert_point(pos) {
         var containers,
@@ -121,17 +113,18 @@ Sortable.prototype.init_node = function(node) {
          * drag start - create clone and placeholder, keep drag start position.
          */
         dragstart: function(evt) {
-            //visual clone to show drag position
-            $clone = $node.clone().addClass('detached').appendTo($node.parent()).offset($node.offset());
-            //placeholder to show insert position
-            $placeholder = self.create_placeholder().css({height: $node.outerHeight(), width: $node.outerWidth()}).insertAfter($node);
-            //hide actual node
+            $clone = $node.clone()
+                          .addClass('sortable_clone')
+                          .insertAfter($node)
+                          .offset($node.offset());
+            $placeholder = self.create_placeholder()
+                               .css({height: $node.outerHeight(), width: $node.outerWidth()})
+                               .insertAfter($node);
             $node.hide();
-            //drag origin
-            dragorigin = $clone.offset();
+
+            position = new PositionHelper($clone.offset());
 
             if (self.options.autocreate) {
-                //add sublists
                 self.find_nodes().filter(function(ix, el) {
                     return $(el).find(self.options.container).length == 0;
                 }).append('<' + self.options.container_type + ' class="' + self.options.auto_container_class + '"/>');
@@ -139,10 +132,10 @@ Sortable.prototype.init_node = function(node) {
         },
 
         /**
-         * drag - position clone, check for best insert position, move placeholder in dom accordingly.
+         * drag - reposition clone, check for best insert position, move placeholder in dom accordingly.
          */
         drag: function(evt, delta) {
-            var pos = abspos(delta),
+            var pos = position.absolutize(delta),
                 best = find_insert_point(pos);
 
             $clone.offset(pos);
@@ -153,27 +146,23 @@ Sortable.prototype.init_node = function(node) {
          * drag stop - clean up.
          */
         dragstop: function(evt, delta) {
-            var pos = abspos(delta),
+            var pos = position.absolutize(delta),
                 best = find_insert_point(pos);
 
-            //move actual node
             if (best) {
                 $node.nthChild(best.container, best.n);
             }
             $node.show();
 
-            //cleanup
             if ($clone) {
                 $clone.remove();
             }
             if ($placeholder) {
                 $placeholder.remove();
             }
-            dragorigin = null;
             $clone = null;
             $placeholder = null;
 
-            //call callback only if some node has been dragged. order can be identical, though.
             if (best && self.options.update) {
                 self.options.update.call(self.$sortable, evt, self);
             }
@@ -206,7 +195,7 @@ Sortable.prototype.find_nodes = function() {
 
 Sortable.prototype.create_placeholder = function() {
     var self = this;
-    return $('<' + self.options.nodes_type + '/>').addClass('placeholder');
+    return $('<' + self.options.nodes_type + '/>').addClass('sortable_placeholder');
 };
 
 Sortable.prototype.square_dist = function(pos1, pos2) {
@@ -214,27 +203,103 @@ Sortable.prototype.square_dist = function(pos1, pos2) {
 };
 
 
-/**
- * Sortable plugin registration.
- */
-$.fn.sortable = function(options) {
-    var filtered = this.not(function() {
-            return $(this).is('.sortable') || $(this).closest('.sortable').length;
-        });
 
-    if (this.data('sortable') && typeof options === 'string') {
-        return this.data('sortable').invoke(options);
-    }
 
-    if (filtered.length && options && options.group) {
-        new Sortable(filtered, options);
-    } else {
-        filtered.each(function(ix, el) {
-            new Sortable(el, options);
-        });
-    }
-    return this;
+function Draggable(el, options) {
+    var self = this,
+        defaults = {
+            //options
+            revert: false,
+            placeholder: false,
+            //callbacks
+            update: null
+        };
+
+    self.$draggable = $(el).data('draggable', self);
+    self.options = $.extend({}, defaults, options);
+
+    self.init();
+}
+
+Draggable.prototype.init = function() {
+    var self = this,
+        $clone,
+        $placeholder,
+        position;
+
+    self.$draggable
+    .addClass('draggable')
+    .on('destroy.draggable', function() {
+        self.destroy();
+    });
+
+    self.$draggable.dragaware({
+        /**
+         * drag start - create clone and placeholder, keep drag start position.
+         */
+        dragstart: function(evt) {
+            if (self.options.placeholder) {
+                $placeholder = self.create_clone('draggable_placeholder');
+            }
+
+            if (self.options.revert) {
+                $clone = self.create_clone('draggable_clone');
+                self.$draggable.hide();
+            } else {
+                $clone = self.$draggable;
+            }
+
+            position = new PositionHelper($clone.offset());
+        },
+
+        /**
+         * drag - reposition clone.
+         */
+        drag: function(evt, delta) {
+            $clone.offset(position.absolutize(delta));
+        },
+
+        /**
+         * drag stop - clean up.
+         */
+        dragstop: function(evt, delta) {
+            if (self.options.revert) {
+                $clone.remove();
+                self.$draggable.show();
+            }
+
+            if (self.options.placeholder) {
+                $placeholder.remove();
+            }
+
+            $clone = null;
+            $placeholder = null;
+
+            if (self.options.update) {
+                self.options.update.call(self.$draggable, evt, self);
+            }
+        }
+    });
 };
+
+Draggable.prototype.destroy = function() {
+    var self = this;
+
+    self.$draggable
+    .dragaware('destroy')
+    .removeClass('draggable')
+    .off('.draggable');
+};
+
+Draggable.prototype.create_clone = function(classname) {
+    var self = this;
+    return self.$draggable
+    .clone()
+    .addClass(classname)
+    .insertAfter(self.$draggable)
+    .offset(self.$draggable.offset());
+};
+
 
 
 
@@ -302,8 +367,64 @@ function Dragaware(el, options) {
 }
 
 
+
+
+function PositionHelper(origin) {
+    this.origin = origin;
+}
+PositionHelper.prototype.absolutize = function(relpos) {
+    if (!relpos) {
+        return this.origin;
+    }
+    return {top: this.origin.top + relpos.dy, left: this.origin.left + relpos.dx};
+};
+
+
+
+
+// Plugin registration.
+
+
 /**
- * Dragaware plugin registration.
+ * Sortable plugin.
+ */
+$.fn.sortable = function(options) {
+    var filtered = this.not(function() {
+            return $(this).is('.sortable') || $(this).closest('.sortable').length;
+        });
+
+    if (this.data('sortable') && typeof options === 'string') {
+        return this.data('sortable').invoke(options);
+    }
+
+    if (filtered.length && options && options.group) {
+        new Sortable(filtered, options);
+    } else {
+        filtered.each(function(ix, el) {
+            new Sortable(el, options);
+        });
+    }
+    return this;
+};
+
+
+/**
+ * Draggable plugin.
+ */
+$.fn.draggable = function(options) {
+    if (options === 'destroy') {
+        this.trigger('destroy.draggable');
+    } else {
+        this.not('.draggable').each(function(ix, el) {
+            new Draggable(el, options);
+        });
+    }
+    return this;
+};
+
+
+/**
+ * Dragaware plugin.
  */
 $.fn.dragaware = function(options) {
     if (options === 'destroy') {

@@ -12,16 +12,23 @@
     cursor: pointer;
 }
 
-.sortable {
+.draggable_clone {
+    position: absolute;
 }
 
-.sortable .detached {
+.draggable_placeholder {
+    position: absolute;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+.sortable .sortable_clone {
     position: absolute;
     list-style-type: none;
     opacity: 0.5;
 }
 
-.sortable .placeholder {
+.sortable .sortable_placeholder {
     box-sizing: border-box;
     list-style-type: none;
     background: #eee;

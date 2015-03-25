@@ -32,8 +32,12 @@
         //div list
         $('.list').sortable({container: '.list'});
 
+        //draggable
+        $('.drag').draggable({revert: false, placeholder: true});
+
         $('.off').on('click', function() {
-          $('.sortable').sortable('destroy');
+          $('.sortable').each(function() { $(this).sortable('destroy'); });
+          $('.draggable').each(function() { $(this).draggable('destroy'); });
         });
       });
     </script>
@@ -41,6 +45,8 @@
   </head>
   <body>
     <button class="off">All off</button>
+    <button class="drag">Drag me</button>
+
     <h3>Normal List</h3>
     <ul class="normal">
       <li>Item 1</li>
@@ -110,6 +116,7 @@
         Item 2
       </li>
     </ul>
+
     <h3>List of DIVs</h3>
     <div class="list">
       <div>Child 1</div>
