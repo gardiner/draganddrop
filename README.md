@@ -1,7 +1,11 @@
-Sortable
-========
+Drag and Drop
+=============
 
-Basic jQuery plugin to allow sorting of lists and other nested html structures (```ul```, ```ol```, ```div``` etc.) via drag and drop.
+Basic jQuery plugin to allow drag and drop:
+
+* dragging
+* dropping of dragged elements
+* sorting of lists and other nested html structures (```ul```, ```ol```, ```div``` etc.)
 
 
 
@@ -17,15 +21,21 @@ Usage
 
 See [demo.html](demo/demo.html) for a working demo.
 
-1. Include jQuery and sortable in document head:
+1. Install draganddrop:
 
-    ```html
-    <link href='bower_components/sortable/src/sortable.css' rel='stylesheet' type='text/css'/>
-    <script src='bower_components/jquery/dist/jquery.min.js' type='text/javascript'></script>
-    <script src='bower_components/sortable/src/sortable.js' type='text/javascript'></script>
+    ```bash
+    $ bower install -S gardiner/draganddrop
     ```
 
-2. Create nested structure inside html:
+2. Include jQuery and draganddrop in document head:
+
+    ```html
+    <link href='bower_components/draganddrop/src/draganddrop.css' rel='stylesheet' type='text/css'/>
+    <script src='bower_components/jquery/dist/jquery.min.js' type='text/javascript'></script>
+    <script src='bower_components/draganddrop/src/draganddrop.js' type='text/javascript'></script>
+    ```
+
+3. Create html structure:
 
     ```html
     <ul id="list">
@@ -42,38 +52,55 @@ See [demo.html](demo/demo.html) for a working demo.
         </li>
         <li>Item 3</li>
     </ul>
+
+    <button id="drag">Drag me</button>
     ```
 
-3. Initialize sortable:
+4. Initialize draggable and sortable:
 
     ```javascript
-    $('#list').sortable(/* see below for options/callbacks and commands */);
+    $('#drag').draggable(/* options/callbacks or command */);
+    $('#list').sortable(/* options/callbacks or command */);
     ```
 
 
+Draggable
+---------
 
-Options and callbacks
----------------------
+Options and callbacks:
 
-During initialization you can specifiy an options object with following keys:
+* ```revert``` (boolean) - if true, the element reverts to its origin after dropping
+* ```placeholder``` (boolean) - if true, a transparent clone of the element is left at the origin while dragging
+* ```droptarget``` (string) - selector for valid drop targets
+* ```update``` (function) - callback after dragging. Arguments: event, Draggable instance. This: draggable element.
+* ```drop``` (function) - callback after dropping on valid droptarget. Arguments: event, droptarget element. This: draggable.element
 
-* ```container``` - selector for container elements
-* ```nodes``` - selector for node elements
-* ```autocreate``` - automatically create nested containers within nodes
-
-
-
-Commands
---------
-
-You can invoke commands on existing sortable instances:
+Commands:
 
 ```javascript
-$('#list').sortable(); //initializes the sortable
-
-//later...
-$('#list').sortable('destroy'); //invokes the destroy command
+$('#drag').draggable('destroy');
 ```
 
-* ```destroy``` - deactivates the sortable instance and unbinds all listeners
+* ```destroy``` - deactivates the Draggable instance and unbinds all listeners
+
+
+Sortable
+--------
+
+Options and callbacks:
+
+* ```container``` (string) - selector for container elements
+* ```nodes``` (string) - selector for node elements
+* ```autocreate``` (boolean) - automatically create nested containers within nodes
+* ```update``` (function) - callback after sorting. Arguments: event, Sortable instance. This: sortable element.
+
+Commands:
+
+```javascript
+$('#list').sortable('serialize');
+$('#list').sortable('destroy');
+```
+
+* ```serialize``` - returns an object representing the structure of the nested list
+* ```destroy``` - deactivates the Sortable instance and unbinds all listeners
 
