@@ -69,8 +69,9 @@ Draggable
 
 Options and callbacks:
 
-* ```revert``` (boolean) - if true, the element reverts to its origin after dropping
-* ```placeholder``` (boolean) - if true, a transparent clone of the element is left at the origin while dragging
+* ```handle``` (string) - selector of handle element (if null the complete element will be used as handle)
+* ```revert``` (boolean) - if true the element reverts to its origin after dropping
+* ```placeholder``` (boolean) - if true a transparent clone of the element is left at the origin while dragging
 * ```droptarget``` (string) - selector for valid drop targets
 * ```update``` (function) - callback after dragging. Arguments: event, Draggable instance. This: draggable element.
 * ```drop``` (function) - callback after dropping on valid droptarget. Arguments: event, droptarget element. This: draggable.element
@@ -92,7 +93,7 @@ Options and callbacks:
 * ```container``` (string) - selector for container elements
 * ```nodes``` (string) - selector for node elements
 * ```autocreate``` (boolean) - automatically create nested containers within nodes
-* ```group``` (boolean) - if true, all elements in the jQuery object are grouped (items can dragged between them)
+* ```group``` (boolean) - if true all elements in the jQuery object are grouped (items can dragged between them)
 * ```update``` (function) - callback after sorting. Arguments: event, Sortable instance. This: sortable element.
 
 Commands:

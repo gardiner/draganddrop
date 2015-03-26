@@ -226,10 +226,10 @@ Sortable.prototype.square_dist = function(pos1, pos2) {
 
 
 function Draggable(el, options) {
-    //TODO: drag handle
     var self = this,
         defaults = {
             //options
+            handle: false,
             revert: false,
             placeholder: false,
             droptarget: false,
@@ -272,6 +272,7 @@ Draggable.prototype.init = function() {
     }
 
     self.$draggable.dragaware({
+        handle: self.options.handle,
         /**
          * drag start - create clone and placeholder, keep drag start position.
          */
@@ -358,7 +359,17 @@ Draggable.prototype.create_clone = function(classname) {
 function Dragaware(el, options) {
     var $dragaware = $(el),
         pos = null,
-        lastpos = null;
+        lastpos = null,
+        defaults = {
+            //options
+            handle: null,
+            //callbacks
+            dragstart: null,
+            drag: null,
+            dragstop: null
+        };
+
+    options = $.extend({}, defaults, options);
 
     function evtpos(evt) {
         evt = window.hasOwnProperty('event') ? window.event : evt;
@@ -415,7 +426,7 @@ function Dragaware(el, options) {
 
     $dragaware
     .addClass('dragaware')
-    .on('touchstart.dragaware mousedown.dragaware', start);
+    .on('touchstart.dragaware mousedown.dragaware', options.handle, start);
 
     $dragaware.on('destroy.dragaware', function() {
         $dragaware
