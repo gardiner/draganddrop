@@ -4,7 +4,6 @@
 
 function Sortable(el, options) {
     //TODO: drag handle
-    //TODO: trigger events (update etc.)
     var self = this,
         $sortable = $(el),
         container_type = $sortable[0].nodeName,
@@ -168,6 +167,7 @@ Sortable.prototype.init_node = function(node) {
             if (best && self.options.update) {
                 self.options.update.call(self.$sortable, evt, self);
             }
+            self.$sortable.trigger('update');
         }
     });
 };
@@ -208,6 +208,7 @@ Sortable.prototype.square_dist = function(pos1, pos2) {
 
 
 function Draggable(el, options) {
+    //TODO: drag handle
     var self = this,
         defaults = {
             //options
@@ -301,10 +302,13 @@ Draggable.prototype.init = function() {
                 self.options.update.call(self.$draggable, evt, self);
             }
 
+            self.$draggable.trigger('update');
+
             if ($droptarget) {
                 if (self.options.drop) {
                     self.options.drop.call(self.$draggable, evt, $droptarget[0]);
                 }
+                $droptarget.trigger('drop');
                 $droptarget.removeClass('hovering');
             }
         }
@@ -357,6 +361,7 @@ function Dragaware(el, options) {
             }
 
             $dragaware.addClass('dragging');
+            $dragaware.trigger('dragstart');
 
             //late binding of event listeners
             $(document)
@@ -382,6 +387,7 @@ function Dragaware(el, options) {
         lastpos = false;
 
         $dragaware.removeClass('dragging');
+        $dragaware.trigger('dragstop');
 
         //unbinding of event listeners
         $(document)
