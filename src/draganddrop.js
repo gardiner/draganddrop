@@ -14,6 +14,7 @@ function Sortable(el, options) {
             container_type: container_type,
             nodes: node_type,
             nodes_type: node_type,
+            placeholder_class: null,
             auto_container_class: 'sortable_container',
             autocreate: false,
             group: false,
@@ -89,25 +90,39 @@ Sortable.prototype.init_node = function(node) {
 
         $placeholder.hide();
         containers.each(function(ix, container) {
-            var childnum = $(container).children().length,
+            var $trailing = $(self.create_placeholder()).appendTo(container),
+                $children = $(container).children(self.options.nodes).not('.sortable_clone'),
+                $candidate,
                 n,
-                candidate,
                 dist;
 
-            for (n = 0; n <= childnum; n++) {
-                candidate = self.create_placeholder().nthChild(container, n);
-                dist = self.square_dist(candidate.offset(), pos);
-                candidate.remove();
-
+            for (n = 0; n < $children.length; n++) {
+                $candidate = $children.eq(n);
+                dist = self.square_dist($candidate.offset(), pos);
                 if (!best || best.dist > dist) {
-                    best = {container: container, n: n, dist: dist};
+                    best = {container: container, before: $candidate[0], dist: dist};
                 }
             }
+
+            $trailing.remove();
         });
         $placeholder.show();
 
         return best;
     }
+
+    function insert($element, best) {
+        var $container = $(best.container);
+        if (best.before && best.before.closest('html')) {
+            $element.insertBefore(best.before);
+        } else {
+            $element.appendTo($container);
+        }
+        return this;
+    };
+
+
+
 
     $node.dragaware({
         /**
@@ -115,6 +130,7 @@ Sortable.prototype.init_node = function(node) {
          */
         dragstart: function(evt) {
             $clone = $node.clone()
+                          .removeAttr('id')
                           .addClass('sortable_clone')
                           .insertAfter($node)
                           .offset($node.offset());
@@ -140,7 +156,7 @@ Sortable.prototype.init_node = function(node) {
                 best = find_insert_point(pos);
 
             $clone.offset(pos);
-            $placeholder.nthChild(best.container, best.n);
+            insert($placeholder, best);
         },
 
         /**
@@ -151,7 +167,7 @@ Sortable.prototype.init_node = function(node) {
                 best = find_insert_point(pos);
 
             if (best) {
-                $node.nthChild(best.container, best.n);
+                insert($node, best);
             }
             $node.show();
 
@@ -197,7 +213,9 @@ Sortable.prototype.find_nodes = function() {
 
 Sortable.prototype.create_placeholder = function() {
     var self = this;
-    return $('<' + self.options.nodes_type + '/>').addClass('sortable_placeholder');
+    return $('<' + self.options.nodes_type + '/>')
+    .addClass('sortable_placeholder')
+    .addClass(self.options.placeholder_class);
 };
 
 Sortable.prototype.square_dist = function(pos1, pos2) {
@@ -328,6 +346,7 @@ Draggable.prototype.create_clone = function(classname) {
     var self = this;
     return self.$draggable
     .clone()
+    .removeAttr('id')
     .addClass(classname)
     .insertAfter(self.$draggable)
     .offset(self.$draggable.offset());
@@ -354,7 +373,6 @@ function Dragaware(el, options) {
 
     function start(evt) {
         if (evt.type == 'touchstart' || evt.button == 0) {
-            evt.stopPropagation();
             pos = evtpos(evt);
             if (options.dragstart) {
                 options.dragstart.call($dragaware, evt);
@@ -367,14 +385,15 @@ function Dragaware(el, options) {
             $(document)
             .on('touchend.dragaware mouseup.dragaware click.dragaware', end)
             .on('touchmove.dragaware mousemove.dragaware', move);
+            return false
         }
     }
 
     function move(evt) {
         if (pos && options.drag) {
-            evt.stopPropagation();
             lastpos = relpos(evt);
             options.drag.call($dragaware, evt, lastpos, evtpos(evt));
+            return false;
         }
     }
 
@@ -472,23 +491,6 @@ $.fn.dragaware = function(options) {
         this.not('.dragaware').each(function(ix, el) {
             new Dragaware(el, options);
         });
-    }
-    return this;
-};
-
-
-/**
- * Inserts the current selection as nth child into first element matching selector.
- */
-$.fn.nthChild = function(selector, n) {
-    var $container = $(selector).eq(0),
-        $children = $container.children();
-    if (n == 0) {
-        $container.prepend(this);
-    } else if (n >= $children.length) {
-        $container.append(this);
-    } else {
-        $children.eq(n).before(this);
     }
     return this;
 };
