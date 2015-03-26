@@ -4,6 +4,7 @@
 
 function Sortable(el, options) {
     //TODO: drag handle
+    //TODO: trigger events (update etc.)
     var self = this,
         $sortable = $(el),
         container_type = $sortable[0].nodeName,
@@ -355,6 +356,8 @@ function Dragaware(el, options) {
                 options.dragstart.call($dragaware, evt);
             }
 
+            $dragaware.addClass('dragging');
+
             //late binding of event listeners
             $(document)
             .on('touchend.dragaware mouseup.dragaware click.dragaware', end)
@@ -377,6 +380,8 @@ function Dragaware(el, options) {
         }
         pos = false;
         lastpos = false;
+
+        $dragaware.removeClass('dragging');
 
         //unbinding of event listeners
         $(document)
