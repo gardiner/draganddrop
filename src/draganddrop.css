@@ -14,11 +14,12 @@
 
 .draggable_clone {
     position: absolute;
+    z-index: 100001;
 }
 
 .draggable_placeholder {
     position: absolute;
-    z-index: -1;
+    z-index: 100000;
     opacity: 0.5;
 }
 

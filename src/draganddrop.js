@@ -233,6 +233,7 @@ function Draggable(el, options) {
             revert: false,
             placeholder: false,
             droptarget: false,
+            container: false,
             //callbacks
             update: null,
             drop: null
@@ -349,7 +350,7 @@ Draggable.prototype.create_clone = function(classname) {
     .clone()
     .removeAttr('id')
     .addClass(classname)
-    .insertAfter(self.$draggable)
+    .appendTo(self.options.container || self.$draggable.parent())
     .offset(self.$draggable.offset());
 };
 
