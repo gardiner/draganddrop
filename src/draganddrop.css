@@ -17,9 +17,7 @@
     z-index: 100001;
 }
 
-.draggable_placeholder {
-    position: absolute;
-    z-index: 100000;
+.draggable.dragging {
     opacity: 0.5;
 }
 

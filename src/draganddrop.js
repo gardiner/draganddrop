@@ -248,7 +248,6 @@ function Draggable(el, options) {
 Draggable.prototype.init = function() {
     var self = this,
         $clone,
-        $placeholder,
         position;
 
     self.$draggable
@@ -275,16 +274,14 @@ Draggable.prototype.init = function() {
     self.$draggable.dragaware({
         handle: self.options.handle,
         /**
-         * drag start - create clone and placeholder, keep drag start position.
+         * drag start - create clone, keep drag start position.
          */
         dragstart: function(evt) {
-            if (self.options.placeholder) {
-                $placeholder = self.create_clone('draggable_placeholder');
-            }
-
-            if (self.options.revert) {
+            if (self.options.placeholder || self.options.revert) {
                 $clone = self.create_clone('draggable_clone');
-                self.$draggable.invisible();
+                if (!self.options.placeholder) {
+                    self.$draggable.invisible();
+                }
             } else {
                 $clone = self.$draggable;
             }
@@ -306,17 +303,12 @@ Draggable.prototype.init = function() {
         dragstop: function(evt, delta, pos) {
             var $droptarget = check_droptarget(pos);
 
-            if (self.options.placeholder) {
-                $placeholder.remove();
-            }
-
             if (self.options.revert) {
                 $clone.remove();
                 self.$draggable.visible();
             }
 
             $clone = null;
-            $placeholder = null;
 
             if (self.options.update) {
                 self.options.update.call(self.$draggable, evt, self);
@@ -328,7 +320,7 @@ Draggable.prototype.init = function() {
                 if (self.options.drop) {
                     self.options.drop.call(self.$draggable, evt, $droptarget[0]);
                 }
-                $droptarget.trigger('drop');
+                $droptarget.trigger('drop', [self.$draggable]);
                 $droptarget.removeClass('hovering');
             }
         }
@@ -352,6 +344,51 @@ Draggable.prototype.create_clone = function(classname) {
     .addClass(classname)
     .appendTo(self.options.container || self.$draggable.parent())
     .offset(self.$draggable.offset());
+};
+
+
+
+
+function Droppable(el, options) {
+    var self = this,
+        defaults = {
+            //options
+            accept: false,
+            //callbacks
+            drop: null
+        };
+
+    self.$droppable = $(el).data('droppable', self);
+    self.options = $.extend({}, defaults, options);
+
+    self.init();
+}
+
+Droppable.prototype.init = function() {
+    var self = this;
+
+    self.$droppable
+    .addClass('droppable')
+    .on('drop', function(evt, $draggable) {
+        console.log(arguments);
+        if (self.options.accept && !$draggable.is(self.options.accept)) {
+            return;
+        }
+        if (self.options.drop) {
+            self.options.drop.call(self.$droppable, evt, $draggable);
+        }
+    })
+    .on('destroy.droppable', function() {
+        self.destroy();
+    });
+};
+
+Droppable.prototype.destroy = function() {
+    var self = this;
+
+    self.$droppable
+    .removeClass('droppable')
+    .off('.droppable');
 };
 
 
@@ -490,6 +527,20 @@ $.fn.draggable = function(options) {
         });
     }
     return this;
+};
+
+
+/**
+ * Droppable plugin.
+ */
+$.fn.droppable = function(options) {
+    if (options === 'destroy') {
+        this.trigger('destroy.droppable');
+    } else {
+        this.not('.droppable').each(function(ix, el) {
+            new Droppable(el, options);
+        });
+    }
 };
 
 
