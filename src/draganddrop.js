@@ -18,6 +18,7 @@ function Sortable(el, options) {
             auto_container_class: 'sortable_container',
             autocreate: false,
             group: false,
+            scroll: false,
             //callbacks
             update: null
         };
@@ -125,6 +126,7 @@ Sortable.prototype.init_node = function(node) {
 
 
     $node.dragaware({
+        scroll: self.options.scroll,
         /**
          * drag start - create clone and placeholder, keep drag start position.
          */
@@ -234,6 +236,7 @@ function Draggable(el, options) {
             placeholder: false,
             droptarget: false,
             container: false,
+            scroll: false,
             //callbacks
             update: null,
             drop: null
@@ -273,6 +276,7 @@ Draggable.prototype.init = function() {
 
     self.$draggable.dragaware({
         handle: self.options.handle,
+        scroll: self.options.scroll,
         /**
          * drag start - create clone, keep drag start position.
          */
@@ -401,23 +405,54 @@ function Dragaware(el, options) {
         defaults = {
             //options
             handle: null,
+            scroll: false,
+            scrollspeed: 15,
+            scrolltimeout: 50,
             //callbacks
             dragstart: null,
             drag: null,
             dragstop: null
-        };
+        },
+        scrolltimeout;
 
     options = $.extend({}, defaults, options);
 
     function evtpos(evt) {
         evt = window.hasOwnProperty('event') ? window.event : evt;
-        evt = evt.hasOwnProperty('touches') ? evt.touches[0] : evt;
+        evt = evt && evt.hasOwnProperty('touches') ? evt.touches[0] : evt;
         return {x: evt.pageX, y: evt.pageY};
     }
 
     function relpos(evt) {
         var p = evtpos(evt);
         return {dx: p.x - pos.x, dy: p.y - pos.y};
+    }
+
+    function autoscroll(mouse) {
+        //TODO: allow window scrolling
+        //TODO: handle nested scroll containers
+        var sp = $dragaware.scrollParent(),
+            offset = sp.offset(),
+            scrollLeft = sp.scrollLeft(),
+            scrollTop = sp.scrollTop(),
+            width = sp.width(),
+            height = sp.height();
+
+        window.clearTimeout(scrolltimeout);
+
+        if (scrollLeft > 0 && mouse.x < offset.left) {
+            sp.scrollLeft(scrollLeft - options.scrollspeed);
+        } else if (scrollLeft < sp.prop('scrollWidth') - width && mouse.x > offset.left + width) {
+            sp.scrollLeft(scrollLeft + options.scrollspeed);
+        } else if (scrollTop > 0 && mouse.y < offset.top) {
+            sp.scrollTop(scrollTop - options.scrollspeed);
+        } else if (scrollTop < sp.prop('scrollHeight') - height && mouse.y > offset.top + height) {
+            sp.scrollTop(scrollTop + options.scrollspeed);
+        } else {
+            return; //so we don't set the next timeout
+        }
+
+        scrolltimeout = window.setTimeout(function() { autoscroll(mouse); }, options.scrolltimeout);
     }
 
     function start(evt) {
@@ -439,6 +474,9 @@ function Dragaware(el, options) {
     }
 
     function move(evt) {
+        if (options.scroll) {
+            autoscroll(evtpos(evt));
+        }
         if (pos && options.drag) {
             lastpos = relpos(evt);
             options.drag.call($dragaware, evt, lastpos, evtpos(evt));
@@ -447,6 +485,8 @@ function Dragaware(el, options) {
     }
 
     function end(evt) {
+        window.clearTimeout(scrolltimeout);
+
         if (pos && options.dragstop) {
             evt.stopPropagation();
             options.dragstop.call($dragaware, evt, lastpos, evtpos(evt));
@@ -588,6 +628,14 @@ $.fn.invisible = function() {
 
 $.fn.visible = function() {
     return this.css({visibility: 'visible'});
+};
+
+
+$.fn.scrollParent = function() {
+    return this.parents().filter(function() {
+        var p = $(this);
+        return (/(scroll|auto)/).test(p.css("overflow-x") + p.css("overflow-y") + p.css("overflow"));
+    });
 };
 
 
