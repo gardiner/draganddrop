@@ -581,6 +581,7 @@ $.fn.droppable = function(options) {
             new Droppable(el, options);
         });
     }
+    return this;
 };
 
 
