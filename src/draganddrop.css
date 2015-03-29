@@ -17,7 +17,7 @@
     z-index: 100001;
 }
 
-.draggable.dragging {
+.draggable.dragging, .draggable .dragging {
     opacity: 0.5;
 }
 

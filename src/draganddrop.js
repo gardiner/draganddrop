@@ -216,6 +216,7 @@ function Draggable(el, options) {
         defaults = {
             //options
             handle: false,
+            delegate: false,
             revert: false,
             placeholder: false,
             droptarget: false,
@@ -263,13 +264,14 @@ Draggable.prototype.init = function() {
          * drag start - create clone, keep drag start origin.
          */
         dragstart: function(evt) {
+            var $this = $(this);
             if (self.options.placeholder || self.options.revert) {
-                $clone = self.create_clone('draggable_clone');
+                $clone = self.create_clone($this, 'draggable_clone');
                 if (!self.options.placeholder) {
-                    self.$draggable.invisible();
+                    $(this).invisible();
                 }
             } else {
-                $clone = self.$draggable;
+                $clone = $this;
             }
 
             origin = new PositionHelper($clone.offset());
@@ -287,26 +289,30 @@ Draggable.prototype.init = function() {
          * drag stop - clean up.
          */
         dragstop: function(evt, pos) {
-            var $droptarget = check_droptarget(pos);
+            var $this = $(this),
+                $droptarget = check_droptarget(pos);
 
-            if (self.options.revert) {
+            if (self.options.revert || self.options.placeholder) {
+                $this.visible();
+                if (!self.options.revert) {
+                    $this.offset(origin.absolutize(pos));
+                }
                 $clone.remove();
-                self.$draggable.visible();
             }
 
             $clone = null;
 
             if (self.options.update) {
-                self.options.update.call(self.$draggable, evt, self);
+                self.options.update.call($this, evt, self);
             }
 
-            self.$draggable.trigger('update');
+            $this.trigger('update');
 
             if ($droptarget) {
                 if (self.options.drop) {
-                    self.options.drop.call(self.$draggable, evt, $droptarget[0]);
+                    self.options.drop.call($this, evt, $droptarget[0]);
                 }
-                $droptarget.trigger('drop', [self.$draggable]);
+                $droptarget.trigger('drop', [$this]);
                 $droptarget.removeClass('hovering');
             }
         }
@@ -322,14 +328,14 @@ Draggable.prototype.destroy = function() {
     .off('.draggable');
 };
 
-Draggable.prototype.create_clone = function(classname) {
+Draggable.prototype.create_clone = function(pattern, classname) {
     var self = this;
-    return self.$draggable
+    return pattern
     .clone()
     .removeAttr('id')
     .addClass(classname)
-    .appendTo(self.options.container || self.$draggable.parent())
-    .offset(self.$draggable.offset());
+    .appendTo(self.options.container || pattern.parent())
+    .offset(pattern.offset());
 };
 
 
