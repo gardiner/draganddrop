@@ -30,7 +30,7 @@
         });
 
         //div list
-        $('.list').sortable({container: '.list'});
+        $('.list.parent').sortable({container: '.list', nodes: ':not(.list)'});
 
         //draggable
         $('.drag').draggable();
@@ -133,7 +133,7 @@
     </ul>
 
     <h3>List of DIVs</h3>
-    <div class="list">
+    <div class="list parent">
       <div>Child 1</div>
       <div>Child 2</div>
       <div>
