@@ -70,6 +70,7 @@ Draggable
 Options and callbacks:
 
 * ```handle``` (string) - selector of handle element (if null the complete element will be used as handle)
+* ```delegate``` (string) - selector of delegate element (this wil be referenced as this in the event callbacks)
 * ```revert``` (boolean) - if true the element reverts to its origin after dropping
 * ```placeholder``` (boolean) - if true a transparent clone of the element is left at the origin while dragging
 * ```droptarget``` (string) - selector for valid drop targets
@@ -91,6 +92,7 @@ Sortable
 
 Options and callbacks:
 
+* ```handle``` (string) - selector of handle element (if null the complete element will be used as handle)
 * ```container``` (string) - selector for container elements
 * ```nodes``` (string) - selector for node elements
 * ```autocreate``` (boolean) - automatically create nested containers within nodes

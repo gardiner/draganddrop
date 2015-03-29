@@ -39,7 +39,10 @@ Sortable.prototype.invoke = function(command) {
 };
 
 Sortable.prototype.init = function() {
-    var self = this;
+    var self = this,
+        $clone,
+        $placeholder,
+        origin;
 
     $('html').unselectable();
 
@@ -49,33 +52,7 @@ Sortable.prototype.init = function() {
         self.destroy();
     });
 
-    self.find_nodes().each(function(ix, node) {
-        self.init_node(node);
-    });
-};
-
-Sortable.prototype.destroy = function() {
-    var self = this;
-
-    $('html').unselectable('destroy');
-
-    self.$sortable
-    .removeClass('sortable')
-    .off('.sortable');
-
-    self.find_nodes().each(function(ix, node) {
-        self.destroy_node(node);
-    });
-};
-
-Sortable.prototype.init_node = function(node) {
-    var self = this,
-        $node = $(node),
-        $clone,
-        $placeholder,
-        origin;
-
-    function find_insert_point(offset) {
+    function find_insert_point($node, offset) {
         var containers,
             best;
 
@@ -119,17 +96,16 @@ Sortable.prototype.init_node = function(node) {
         } else {
             $element.appendTo($container);
         }
-        return this;
     };
 
-
-
-
-    $node.dragaware($.extend({}, self.options, {
+    self.$sortable.dragaware($.extend({}, self.options, {
+        delegate: self.options.nodes,
         /**
          * drag start - create clone and placeholder, keep drag start origin.
          */
         dragstart: function(evt) {
+            var $node = $(this);
+
             $clone = $node.clone()
                           .removeAttr('id')
                           .addClass('sortable_clone')
@@ -153,8 +129,9 @@ Sortable.prototype.init_node = function(node) {
          * drag - reposition clone, check for best insert position, move placeholder in dom accordingly.
          */
         drag: function(evt, pos) {
-            var offset = origin.absolutize(pos),
-                best = find_insert_point(offset);
+            var $node = $(this),
+                offset = origin.absolutize(pos),
+                best = find_insert_point($node, offset);
 
             $clone.offset(offset);
             insert($placeholder, best);
@@ -164,8 +141,9 @@ Sortable.prototype.init_node = function(node) {
          * drag stop - clean up.
          */
         dragstop: function(evt, pos) {
-            var offset = origin.absolutize(pos),
-                best = find_insert_point(offset);
+            var $node = $(this),
+                offset = origin.absolutize(pos),
+                best = find_insert_point($node, offset);
 
             if (best) {
                 insert($node, best);
@@ -189,8 +167,15 @@ Sortable.prototype.init_node = function(node) {
     }));
 };
 
-Sortable.prototype.destroy_node = function(node) {
-    $(node).dragaware('destroy');
+Sortable.prototype.destroy = function() {
+    var self = this;
+
+    $('html').unselectable('destroy');
+
+    self.$sortable
+    .removeClass('sortable')
+    .off('.sortable')
+    .dragaware('destroy');
 };
 
 Sortable.prototype.serialize = function(container) {
@@ -371,7 +356,6 @@ Droppable.prototype.init = function() {
     self.$droppable
     .addClass('droppable')
     .on('drop', function(evt, $draggable) {
-        console.log(arguments);
         if (self.options.accept && !$draggable.is(self.options.accept)) {
             return;
         }
@@ -397,11 +381,13 @@ Droppable.prototype.destroy = function() {
 
 function Dragaware(el, options) {
     var $dragaware = $(el),
+        $reference = null,
         origin = null,
         lastpos = null,
         defaults = {
             //options
             handle: null,
+            delegate: null,
             scroll: false,
             scrollspeed: 15,
             scrolltimeout: 50,
@@ -463,14 +449,18 @@ function Dragaware(el, options) {
     }
 
     function start(evt) {
-        if (evt.type == 'touchstart' || evt.button == 0) {
+        var $target = $(evt.target);
+
+        $reference = options.delegate ? $target.closest(options.delegate) : $dragaware;
+
+        if ($target.closest(options.handle || '*').length && (evt.type == 'touchstart' || evt.button == 0)) {
             origin = lastpos = evtpos(evt);
             if (options.dragstart) {
-                options.dragstart.call($dragaware, evt, lastpos);
+                options.dragstart.call($reference, evt, lastpos);
             }
 
-            $dragaware.addClass('dragging');
-            $dragaware.trigger('dragstart');
+            $reference.addClass('dragging');
+            $reference.trigger('dragstart');
 
             //late binding of event listeners
             $(document)
@@ -487,7 +477,7 @@ function Dragaware(el, options) {
             autoscroll(lastpos);
         }
         if (options.drag) {
-            options.drag.call($dragaware, evt, lastpos);
+            options.drag.call($reference, evt, lastpos);
             return false;
         }
     }
@@ -496,14 +486,15 @@ function Dragaware(el, options) {
         window.clearTimeout(scrolltimeout);
 
         if (options.dragstop) {
-            options.dragstop.call($dragaware, evt, lastpos);
+            options.dragstop.call($reference, evt, lastpos);
         }
+
+        $reference.removeClass('dragging');
+        $reference.trigger('dragstop');
 
         origin = false;
         lastpos = false;
-
-        $dragaware.removeClass('dragging');
-        $dragaware.trigger('dragstop');
+        $reference = false;
 
         //unbinding of event listeners
         $(document)
@@ -514,7 +505,7 @@ function Dragaware(el, options) {
 
     $dragaware
     .addClass('dragaware')
-    .on('touchstart.dragaware mousedown.dragaware', options.handle, start);
+    .on('touchstart.dragaware mousedown.dragaware', options.delegate, start);
 
     $dragaware.on('destroy.dragaware', function() {
         $dragaware
@@ -643,7 +634,7 @@ $.fn.visible = function() {
 
 
 $.fn.scrollParent = function() {
-    return this.parents().filter(function() {
+    return this.parents().addBack().filter(function() {
         var p = $(this);
         return (/(scroll|auto)/).test(p.css("overflow-x") + p.css("overflow-y") + p.css("overflow"));
     });
