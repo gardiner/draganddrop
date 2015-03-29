@@ -34,6 +34,7 @@
 
         //draggable
         $('.drag').draggable();
+        $('.draghandle').draggable({handle: '.handle'});
         $('.dragdrop').draggable({
           revert: true,
           placeholder: true,
@@ -57,6 +58,7 @@
 
     <h3>Draggables</h3>
     <button class="drag">Drag me</button>
+    <button class="draghandle">Drag my <strong class="handle">handle</strong></button>
     <button class="dragdrop">Drag and Drop me</button>
     <div class="drop"><p>Drop here</p></div>
 
