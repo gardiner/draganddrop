@@ -3,13 +3,13 @@
 
 
 function Sortable(el, options) {
-    //TODO: drag handle
     var self = this,
         $sortable = $(el),
         container_type = $sortable[0].nodeName,
         node_type = (container_type == 'OL' || container_type == 'UL') ? 'LI' : 'DIV',
         defaults = {
             //options
+            handle: false,
             container: container_type,
             container_type: container_type,
             nodes: node_type,
