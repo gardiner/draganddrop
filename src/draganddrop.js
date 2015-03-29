@@ -73,13 +73,13 @@ Sortable.prototype.init_node = function(node) {
         $node = $(node),
         $clone,
         $placeholder,
-        position;
+        origin;
 
-    function find_insert_point(pos) {
+    function find_insert_point(offset) {
         var containers,
             best;
 
-        if (!pos) {
+        if (!offset) {
             return;
         }
 
@@ -99,7 +99,7 @@ Sortable.prototype.init_node = function(node) {
 
             for (n = 0; n < $children.length; n++) {
                 $candidate = $children.eq(n);
-                dist = self.square_dist($candidate.offset(), pos);
+                dist = self.square_dist($candidate.offset(), offset);
                 if (!best || best.dist > dist) {
                     best = {container: container, before: $candidate[0], dist: dist};
                 }
@@ -125,10 +125,9 @@ Sortable.prototype.init_node = function(node) {
 
 
 
-    $node.dragaware({
-        scroll: self.options.scroll,
+    $node.dragaware($.extend({}, self.options, {
         /**
-         * drag start - create clone and placeholder, keep drag start position.
+         * drag start - create clone and placeholder, keep drag start origin.
          */
         dragstart: function(evt) {
             $clone = $node.clone()
@@ -141,7 +140,7 @@ Sortable.prototype.init_node = function(node) {
                                .insertAfter($node);
             $node.hide();
 
-            position = new PositionHelper($clone.offset());
+            origin = new PositionHelper($clone.offset());
 
             if (self.options.autocreate) {
                 self.find_nodes().filter(function(ix, el) {
@@ -153,20 +152,20 @@ Sortable.prototype.init_node = function(node) {
         /**
          * drag - reposition clone, check for best insert position, move placeholder in dom accordingly.
          */
-        drag: function(evt, delta) {
-            var pos = position.absolutize(delta),
-                best = find_insert_point(pos);
+        drag: function(evt, pos) {
+            var offset = origin.absolutize(pos),
+                best = find_insert_point(offset);
 
-            $clone.offset(pos);
+            $clone.offset(offset);
             insert($placeholder, best);
         },
 
         /**
          * drag stop - clean up.
          */
-        dragstop: function(evt, delta) {
-            var pos = position.absolutize(delta),
-                best = find_insert_point(pos);
+        dragstop: function(evt, pos) {
+            var offset = origin.absolutize(pos),
+                best = find_insert_point(offset);
 
             if (best) {
                 insert($node, best);
@@ -187,7 +186,7 @@ Sortable.prototype.init_node = function(node) {
             }
             self.$sortable.trigger('update');
         }
-    });
+    }));
 };
 
 Sortable.prototype.destroy_node = function(node) {
@@ -251,7 +250,7 @@ function Draggable(el, options) {
 Draggable.prototype.init = function() {
     var self = this,
         $clone,
-        position;
+        origin;
 
     self.$draggable
     .addClass('draggable')
@@ -265,7 +264,7 @@ Draggable.prototype.init = function() {
         $('.hovering').removeClass('hovering');
 
         $clone.hide();
-        $over = $(document.elementFromPoint(pos.x, pos.y)).closest(self.options.droptarget);
+        $over = $(document.elementFromPoint(pos.clientX, pos.clientY)).closest(self.options.droptarget);
         $clone.show();
 
         if ($over.length) {
@@ -274,11 +273,9 @@ Draggable.prototype.init = function() {
         }
     }
 
-    self.$draggable.dragaware({
-        handle: self.options.handle,
-        scroll: self.options.scroll,
+    self.$draggable.dragaware($.extend({}, self.options, {
         /**
-         * drag start - create clone, keep drag start position.
+         * drag start - create clone, keep drag start origin.
          */
         dragstart: function(evt) {
             if (self.options.placeholder || self.options.revert) {
@@ -290,21 +287,21 @@ Draggable.prototype.init = function() {
                 $clone = self.$draggable;
             }
 
-            position = new PositionHelper($clone.offset());
+            origin = new PositionHelper($clone.offset());
         },
 
         /**
          * drag - reposition clone.
          */
-        drag: function(evt, delta, pos) {
+        drag: function(evt, pos) {
             var $droptarget = check_droptarget(pos);
-            $clone.offset(position.absolutize(delta));
+            $clone.offset(origin.absolutize(pos));
         },
 
         /**
          * drag stop - clean up.
          */
-        dragstop: function(evt, delta, pos) {
+        dragstop: function(evt, pos) {
             var $droptarget = check_droptarget(pos);
 
             if (self.options.revert) {
@@ -328,7 +325,7 @@ Draggable.prototype.init = function() {
                 $droptarget.removeClass('hovering');
             }
         }
-    });
+    }));
 };
 
 Draggable.prototype.destroy = function() {
@@ -400,7 +397,7 @@ Droppable.prototype.destroy = function() {
 
 function Dragaware(el, options) {
     var $dragaware = $(el),
-        pos = null,
+        origin = null,
         lastpos = null,
         defaults = {
             //options
@@ -417,21 +414,31 @@ function Dragaware(el, options) {
 
     options = $.extend({}, defaults, options);
 
+    /**
+     * Returns the event position
+     * dX, dY relative to drag start
+     * pageX, pageY relative to document
+     * clientX, clientY relative to browser window
+     */
     function evtpos(evt) {
         evt = window.hasOwnProperty('event') ? window.event : evt;
         evt = evt && evt.hasOwnProperty('touches') ? evt.touches[0] : evt;
-        return {x: evt.pageX, y: evt.pageY};
+
+        return {
+            pageX: evt.pageX,
+            pageY: evt.pageY,
+            clientX: evt.clientX,
+            clientY: evt.clientY,
+            dX: origin ? evt.pageX - origin.pageX : 0,
+            dY: origin ? evt.pageY - origin.pageY : 0
+        };
     }
 
-    function relpos(evt) {
-        var p = evtpos(evt);
-        return {dx: p.x - pos.x, dy: p.y - pos.y};
-    }
-
-    function autoscroll(mouse) {
+    function autoscroll(pos) {
         //TODO: allow window scrolling
         //TODO: handle nested scroll containers
         var sp = $dragaware.scrollParent(),
+            mouse = {x: pos.pageX, y: pos.pageY},
             offset = sp.offset(),
             scrollLeft = sp.scrollLeft(),
             scrollTop = sp.scrollTop(),
@@ -452,14 +459,14 @@ function Dragaware(el, options) {
             return; //so we don't set the next timeout
         }
 
-        scrolltimeout = window.setTimeout(function() { autoscroll(mouse); }, options.scrolltimeout);
+        scrolltimeout = window.setTimeout(function() { autoscroll(pos); }, options.scrolltimeout);
     }
 
     function start(evt) {
         if (evt.type == 'touchstart' || evt.button == 0) {
-            pos = evtpos(evt);
+            origin = lastpos = evtpos(evt);
             if (options.dragstart) {
-                options.dragstart.call($dragaware, evt);
+                options.dragstart.call($dragaware, evt, lastpos);
             }
 
             $dragaware.addClass('dragging');
@@ -474,12 +481,13 @@ function Dragaware(el, options) {
     }
 
     function move(evt) {
+        lastpos = evtpos(evt);
+
         if (options.scroll) {
-            autoscroll(evtpos(evt));
+            autoscroll(lastpos);
         }
-        if (pos && options.drag) {
-            lastpos = relpos(evt);
-            options.drag.call($dragaware, evt, lastpos, evtpos(evt));
+        if (options.drag) {
+            options.drag.call($dragaware, evt, lastpos);
             return false;
         }
     }
@@ -487,11 +495,11 @@ function Dragaware(el, options) {
     function end(evt) {
         window.clearTimeout(scrolltimeout);
 
-        if (pos && options.dragstop) {
-            evt.stopPropagation();
-            options.dragstop.call($dragaware, evt, lastpos, evtpos(evt));
+        if (options.dragstop) {
+            options.dragstop.call($dragaware, evt, lastpos);
         }
-        pos = false;
+
+        origin = false;
         lastpos = false;
 
         $dragaware.removeClass('dragging');
@@ -500,6 +508,8 @@ function Dragaware(el, options) {
         //unbinding of event listeners
         $(document)
         .off('.dragaware');
+
+        return false;
     }
 
     $dragaware
@@ -519,11 +529,11 @@ function Dragaware(el, options) {
 function PositionHelper(origin) {
     this.origin = origin;
 }
-PositionHelper.prototype.absolutize = function(relpos) {
-    if (!relpos) {
+PositionHelper.prototype.absolutize = function(pos) {
+    if (!pos) {
         return this.origin;
     }
-    return {top: this.origin.top + relpos.dy, left: this.origin.left + relpos.dx};
+    return {top: this.origin.top + pos.dY, left: this.origin.left + pos.dX};
 };
 
 
