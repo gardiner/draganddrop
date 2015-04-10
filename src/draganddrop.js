@@ -109,6 +109,7 @@ Sortable.prototype.init = function() {
             $clone = $node.clone()
                           .removeAttr('id')
                           .addClass('sortable_clone')
+                          .css({position: 'absolute'})
                           .insertAfter($node)
                           .offset($node.offset());
             $placeholder = self.create_placeholder()
@@ -266,7 +267,12 @@ Draggable.prototype.init = function() {
         dragstart: function(evt) {
             var $this = $(this);
             if (self.options.placeholder || self.options.revert) {
-                $clone = self.create_clone($this, 'draggable_clone');
+                $clone = $this.clone()
+                              .removeAttr('id')
+                              .addClass('draggable_clone')
+                              .css({position: 'absolute'})
+                              .appendTo(self.options.container || $this.parent())
+                              .offset($this.offset());
                 if (!self.options.placeholder) {
                     $(this).invisible();
                 }
@@ -326,16 +332,6 @@ Draggable.prototype.destroy = function() {
     .dragaware('destroy')
     .removeClass('draggable')
     .off('.draggable');
-};
-
-Draggable.prototype.create_clone = function(pattern, classname) {
-    var self = this;
-    return pattern
-    .clone()
-    .removeAttr('id')
-    .addClass(classname)
-    .appendTo(self.options.container || pattern.parent())
-    .offset(pattern.offset());
 };
 
 

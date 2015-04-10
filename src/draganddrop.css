@@ -13,7 +13,7 @@
 }
 
 .draggable_clone {
-    position: absolute;
+    position: absolute; /* also set via javascript */
     z-index: 100001;
 }
 
@@ -22,7 +22,8 @@
 }
 
 .sortable .sortable_clone {
-    position: absolute;
+    position: absolute; /* also set via javascript */
+    z-index: 100001;
     list-style-type: none;
     opacity: 0.5;
 }
