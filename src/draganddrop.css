@@ -15,6 +15,7 @@
 .draggable_clone {
     position: absolute; /* also set via javascript */
     z-index: 100001;
+    pointer-events:none; /* disable mouse events on the clone */
 }
 
 .draggable.dragging, .draggable .dragging {

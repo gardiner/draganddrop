@@ -87,6 +87,11 @@ $('#drag').draggable('destroy');
 * ```destroy``` - deactivates the Draggable instance and unbinds all listeners
 
 
+Limitations/Issues:
+
+When ```placeholder``` or ```revert``` is set to true, click events on the draggable element would be swallowed by the generated clone. For most browsers (except Internet Explorer) this has been fixed by setting the clone to ```pointer-events: none;```.
+
+
 Sortable
 --------
 
