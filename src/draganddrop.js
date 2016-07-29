@@ -410,7 +410,11 @@ function Dragaware(el, options) {
      */
     function evtpos(evt) {
         evt = window.hasOwnProperty('event') ? window.event : evt;
-        evt = evt && evt.hasOwnProperty('touches') ? evt.touches[0] : evt;
+        //extract touch event if present
+        if (evt.type.substr(0, 5) === 'touch') {
+            evt = evt.hasOwnProperty('originalEvent') ? evt.originalEvent : evt;
+            evt = evt.touches[0];
+        }
 
         return {
             pageX: evt.pageX,
