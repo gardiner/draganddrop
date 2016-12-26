@@ -482,6 +482,9 @@ function Dragaware(el, options) {
         if (options.scroll) {
             autoscroll(lastpos);
         }
+
+        $reference.trigger('dragging');
+
         if (options.drag) {
             options.drag.call($reference, evt, lastpos);
             return false;
