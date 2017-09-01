@@ -12,6 +12,7 @@ function Sortable(el, options) {
             handle: false,
             container: container_type,
             container_type: container_type,
+            same_depth: false,
             nodes: node_type,
             nodes_type: node_type,
             placeholder_class: null,
@@ -54,7 +55,8 @@ Sortable.prototype.init = function() {
 
     function find_insert_point($node, offset) {
         var containers,
-            best;
+            best,
+            depth;
 
         if (!offset) {
             return;
@@ -65,6 +67,13 @@ Sortable.prototype.init = function() {
         .not($node.find(self.options.container))
         .not($clone.find(self.options.container))
         .not(self.find_nodes());
+
+        if (self.options.same_depth) {
+            depth = $node.parent().nestingDepth('ul');
+            containers = containers.filter(function() {
+                return $(this).nestingDepth('ul') == depth;
+            });
+        }
 
         $placeholder.hide();
         containers.each(function(ix, container) {
@@ -647,6 +656,15 @@ $.fn.scrollParent = function() {
         var p = $(this);
         return (/(scroll|auto)/).test(p.css("overflow-x") + p.css("overflow-y") + p.css("overflow"));
     });
+};
+
+$.fn.nestingDepth = function(selector) {
+    var parent = this.parent().closest(selector || '*');
+    if (parent.length) {
+        return parent.nestingDepth(selector) + 1;
+    } else {
+        return 0;
+    }
 };
 
 
