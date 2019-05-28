@@ -1,4 +1,4 @@
-(function($) {
+define(['jquery'], function($) {
 "use strict";
 
 
@@ -673,4 +673,4 @@ $.fn.nestingDepth = function(selector) {
 };
 
 
-}(jQuery));
+});
