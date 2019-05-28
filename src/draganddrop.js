@@ -13,6 +13,7 @@ function Sortable(el, options) {
             container: container_type,
             container_type: container_type,
             same_depth: false,
+            make_unselectable: false,
             nodes: node_type,
             nodes_type: node_type,
             placeholder_class: null,
@@ -45,7 +46,9 @@ Sortable.prototype.init = function() {
         $placeholder,
         origin;
 
-    $('html').unselectable();
+    if (self.options.make_unselectable) {
+        $('html').unselectable();
+    }
 
     self.$sortable
     .addClass('sortable')
@@ -180,7 +183,9 @@ Sortable.prototype.init = function() {
 Sortable.prototype.destroy = function() {
     var self = this;
 
-    $('html').unselectable('destroy');
+    if (self.options.make_unselectable) {
+        $('html').unselectable('destroy');
+    }
 
     self.$sortable
     .removeClass('sortable')
