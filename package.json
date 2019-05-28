@@ -1,0 +1,23 @@
+{
+  "name": "draganddrop",
+  "version": "0.0.8",
+  "description": "Drag and Drop: Dragaware, Draggable, Nested Sortable.",
+  "keywords": [
+    "drag and drop"
+  ],
+  "main": "src/draganddrop.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardiner/draganddrop.git"
+  },
+  "author": "Ole Trenner <ole.trenner@3dbits.de>",
+  "bugs": {
+    "url": "https://github.com/gardiner/draganddrop/issues"
+  },
+  "dependencies": {
+    "jquery": "^2.1.3"
+  },
+  "homepage": "https://github.com/gardiner/draganddrop#readme"
+}
