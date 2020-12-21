@@ -1,4 +1,4 @@
-define(['jquery'], function($) {
+function factory($) {
 "use strict";
 
 
@@ -672,5 +672,20 @@ $.fn.nestingDepth = function(selector) {
     }
 };
 
+return {
+    Sortable,
+    Draggable,
+    Droppable,
+    Dragaware,
+    PositionHelper,
+};
 
-});
+
+}
+
+
+if (typeof define !== 'undefined') {
+    define(['jquery'], factory);
+} else {
+    factory(jQuery, factory);
+}

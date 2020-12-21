@@ -6,8 +6,7 @@
     "drag and drop"
   ],
   "main": "src/draganddrop.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gardiner/draganddrop.git"
@@ -17,7 +16,7 @@
     "url": "https://github.com/gardiner/draganddrop/issues"
   },
   "dependencies": {
-    "jquery": "^2.1.3"
+    "jquery": "*"
   },
   "homepage": "https://github.com/gardiner/draganddrop#readme"
 }
