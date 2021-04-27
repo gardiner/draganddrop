@@ -335,6 +335,11 @@ Draggable.prototype.init = function() {
                 $droptarget.trigger('drop', [$this]);
                 $droptarget.removeClass('hovering');
             }
+            else {
+                if (self.options.onrevert) {
+                   self.options.onrevert.call($this, evt);
+                }
+            }
         }
     }));
 };
