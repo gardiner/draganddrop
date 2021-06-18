@@ -677,13 +677,7 @@ $.fn.nestingDepth = function(selector) {
     }
 };
 
-return {
-    Sortable,
-    Draggable,
-    Droppable,
-    Dragaware,
-    PositionHelper,
-};
+
 
 
 }
