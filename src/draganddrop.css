@@ -27,6 +27,7 @@
     z-index: 100001;
     list-style-type: none;
     opacity: 0.5;
+    pointer-events: none;
 }
 
 .sortable .sortable_placeholder {
