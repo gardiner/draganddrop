@@ -131,7 +131,7 @@ Sortable.prototype.init = function() {
             $node.hide();
 
             origin = new PositionHelper($clone.offset());
-            info = {index: $node.index()};
+            info = {from: $node.index()};
 
             if (self.options.autocreate) {
                 self.find_nodes().filter(function(ix, el) {
@@ -173,7 +173,7 @@ Sortable.prototype.init = function() {
             }
             $clone = null;
             $placeholder = null;
-            info.before = $node.index();
+            info.to = $node.index();
 
             if (best && self.options.update) {
                 self.options.update.call(self.$sortable, evt, self, info);
