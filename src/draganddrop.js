@@ -44,7 +44,8 @@ Sortable.prototype.init = function() {
     var self = this,
         $clone,
         $placeholder,
-        origin;
+        origin,
+        info;
 
     if (self.options.make_unselectable) {
         $('html').unselectable();
@@ -130,6 +131,7 @@ Sortable.prototype.init = function() {
             $node.hide();
 
             origin = new PositionHelper($clone.offset());
+            info = {index: $node.index()};
 
             if (self.options.autocreate) {
                 self.find_nodes().filter(function(ix, el) {
@@ -171,9 +173,10 @@ Sortable.prototype.init = function() {
             }
             $clone = null;
             $placeholder = null;
+            info.before = $node.index();
 
             if (best && self.options.update) {
-                self.options.update.call(self.$sortable, evt, self);
+                self.options.update.call(self.$sortable, evt, self, info);
             }
             self.$sortable.trigger('update');
         }
