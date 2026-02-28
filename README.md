@@ -19,7 +19,7 @@ Requirements
 Usage
 -----
 
-See [demo.html](demo/demo.html) for a working demo.
+See [demo.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/gardiner/draganddrop/master/demo/demo.html) for a working demo.
 
 1. Install draganddrop:
 
