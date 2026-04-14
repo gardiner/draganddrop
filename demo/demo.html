@@ -19,7 +19,8 @@
           autocreate: true,
           update: function(evt) {
             console.log(JSON.stringify($(this).sortable('serialize')));
-          }
+          },
+          //validateDrop: () => false, //callback to optionally prevent dropping
         });
 
         //remaining lists
