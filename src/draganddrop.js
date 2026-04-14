@@ -22,7 +22,7 @@ function Sortable(el, options) {
             group: false,
             scroll: false,
             //callbacks
-	    validateDrop: null,
+            validateDrop: null,
             update: null
         };
 
@@ -132,7 +132,10 @@ Sortable.prototype.init = function() {
             $node.hide();
 
             origin = new PositionHelper($clone.offset());
-            info = {from: $node.index(),fromContainer:$node.parent()};
+            info = {
+                from: $node.index(),
+                fromContainer:$node.parent(),
+            };
 
             if (self.options.autocreate) {
                 self.find_nodes().filter(function(ix, el) {
@@ -161,14 +164,12 @@ Sortable.prototype.init = function() {
                 offset = origin.absolutize(pos),
                 best = find_insert_point($node, offset);
 
-            if (best) {
-	        /* @kswartz26: Added hook for validateDrop if defined */
-	        if (! self.options.validateDrop ||
-                    self.options.validateDrop.call(self.$sortable, evt, self, $node, best)) {
-                    insert($node, best);
-                }
-	    }
-	  
+            if (best && (!self.options.validateDrop ||
+                self.options.validateDrop.call(self.$sortable, evt, self, $node, best))) {
+                /* @kswartz26: Added hook for validateDrop if defined */
+                insert($node, best);
+            }
+      
             $node.show();
 
             if ($clone) {
@@ -180,7 +181,7 @@ Sortable.prototype.init = function() {
             $clone = null;
             $placeholder = null;
             info.to = $node.index();
-	    info.toContainer = $node.parent();
+            info.toContainer = $node.parent();
 
             if (best && self.options.update) {
                 self.options.update.call(self.$sortable, evt, self, info);
@@ -209,7 +210,7 @@ Sortable.prototype.serialize = function(container) {
         var $el = $(el),
             text = $el.clone().children().remove().end().text().trim(), //text only without children
             id = $el.attr('id'),
-            node = {id: id ||text};
+            node = {id: id || text};
         if ($el.find(self.options.nodes).length) {
             node.children = self.serialize($el.children(self.options.container));
         }

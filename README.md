@@ -76,7 +76,7 @@ Options and callbacks:
 * ```droptarget``` (string) - selector for valid drop targets
 * ```scroll``` (boolean) - if true the scrolling parent will be automatically scrolled while dragging
 * ```update``` (function) - callback after dragging. Arguments: event, Draggable instance. This: draggable element.
-* ```drop``` (function) - callback after dropping on valid droptarget. Arguments: event, droptarget element. This: draggable.element
+* ```drop``` (function) - callback after dropping on valid droptarget. Arguments: event, droptarget element. This: draggable element.
 
 Commands:
 
@@ -104,6 +104,7 @@ Options and callbacks:
 * ```group``` (boolean) - if true all elements in the jQuery object are grouped (items can dragged between them)
 * ```scroll``` (boolean) - if true the scrolling parent will be automatically scrolled while dragging
 * ```update``` (function) - callback after sorting. Arguments: event, Sortable instance. This: sortable element.
+* ```validateDrop``` (function) – callback before dropping on valid droptarget. Arguments: event, Sortable instance, droptarget. This: sortable element.
 
 Commands:
 
