@@ -35,6 +35,30 @@ ul.inline li {
     margin: 10px;
 }
 
+table {
+    border-collapse: collapse;
+
+    th, td {
+        padding: 0.5rem 2rem 0.5rem 0.5rem;
+        text-align: left;
+        border-top: 1px solid darkgray;
+    }
+
+    .handle {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+
+        .draghandle {
+            font-size: 120%;
+            cursor: pointer;
+        }
+    }
+
+    th {
+        background: #00000011;
+    }
+}
+
 .list div {
     margin: 2px 0;
     padding: 2px;
@@ -43,8 +67,8 @@ ul.inline li {
 .drop {
     margin: 20px 0;
     padding: 5px;
-    border: 2px dotted orange;
     border-radius: 5px;
+    border: 2px dotted orange;
 }
 
 .drop.hovering {

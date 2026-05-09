@@ -24,6 +24,8 @@ See [demo.html](demo/demo.html) for a working demo.
 1. Install draganddrop:
 
     ```bash
+    $ npm install --save gardiner/draganddrop
+    $ #or:
     $ bower install -S gardiner/draganddrop
     ```
 

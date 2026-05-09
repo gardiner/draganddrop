@@ -33,6 +33,11 @@
         //div list
         $('.list.parent').sortable({container: '.list', nodes: ':not(.list)'});
 
+        //table
+        $('table tbody').sortable({
+          handle: '.trdraghandle'
+        });
+
         //draggable
         $('.drag').draggable();
         $('.draggables').draggable({delegate: 'button', placeholder: true});
@@ -142,7 +147,7 @@
     </ul>
 
     <div class="list parent">
-    <h3>Sortable – List of DIVs</h3>
+      <h3>Sortable – List of DIVs</h3>
       <div>Child 1</div>
       <div>Child 2</div>
       <div>
@@ -153,8 +158,64 @@
       </div>
     </div>
 
+    <h3>Sortable – Table</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="handle"></th>
+          <th>Continent</th>
+          <th>Size [km2]</th>
+          <th>Population</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="handle"><span class="trdraghandle">⠿</span></td>
+          <td>Africa</td>
+          <td>30.3 Million</td>
+          <td>1.58 Billion</td>
+        </tr>
+        <tr>
+          <td class="handle"><span class="trdraghandle">⠿</span></td>
+          <td>Antarctica</td>
+          <td>13.2 Million</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td class="handle"><span class="trdraghandle">⠿</span></td>
+          <td>Asia</td>
+          <td>44.4 Million</td>
+          <td>4.85 Billion</td>
+        </tr>
+        <tr>
+          <td class="handle"><span class="trdraghandle">⠿</span></td>
+          <td>Australia</td>
+          <td>8 Million</td>
+          <td>46 Million</td>
+        </tr>
+        <tr>
+          <td class="handle"><span class="trdraghandle">⠿</span></td>
+          <td>Europe</td>
+          <td>10.5 Million</td>
+          <td>740 Million</td>
+        </tr>
+        <tr>
+          <td class="handle"><span class="trdraghandle">⠿</span></td>
+          <td>Northamerica</td>
+          <td>24.9 Million</td>
+          <td>621 Million</td>
+        </tr>
+        <tr>
+          <td class="handle"><span class="trdraghandle">⠿</span></td>
+          <td>Southamerica</td>
+          <td>17.8 Million</td>
+          <td>450 Million</td>
+        </tr>
+      </tbody>
+    </table>
+
     <h3>Off Switch</h3>
     <button class="off">All off</button>
-
   </body>
 </html>

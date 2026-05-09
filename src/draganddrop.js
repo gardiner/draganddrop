@@ -6,7 +6,8 @@ function Sortable(el, options) {
     var self = this,
         $sortable = $(el),
         container_type = $sortable[0].nodeName,
-        node_type = (container_type == 'OL' || container_type == 'UL') ? 'LI' : 'DIV',
+        node_types = {OL: 'LI', UL: 'LI', TABLE: 'TR', TBODY: 'TR', THEAD: 'TR'},
+        node_type = node_types[container_type] || 'DIV',
         defaults = {
             //options
             handle: false,
